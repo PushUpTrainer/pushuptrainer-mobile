@@ -158,7 +158,7 @@ final class PoseCameraService: NSObject, ObservableObject, AVCaptureVideoDataOut
                 imageHeight: Int32(height),
                 landmarks: points
             )
-            let state = counter.onFrame(frame: frame)
+            let state = counter.onFrame(frame_: frame)
             DispatchQueue.main.async { [weak self] in
                 self?.reps = Int(state.reps)
                 self?.status = points == nil ? "Нет человека в кадре" : "Поза обнаружена"
