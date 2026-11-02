@@ -19,12 +19,16 @@ Use the run configurations provided by the run widget in your IDE's toolbar. You
 - Android app: `./gradlew :androidApp:assembleDebug`
 - iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
+The Android app uses CameraX and MediaPipe Pose Landmarker with the bundled full model. It sends 12 pose points to the push-up counter in `shared/commonMain`. The iOS entry point and shared starter UI are unchanged.
+
 ### Running tests
 
 Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 
 - Android tests: `./gradlew :shared:testAndroidHostTest`
 - iOS tests: `./gradlew :shared:iosSimulatorArm64Test`
+
+The Android host test replays 2,728 recorded frames against the Python reference output. Live counting still needs validation with a person on a physical device.
 
 ---
 
