@@ -19,7 +19,7 @@ Use the run configurations provided by the run widget in your IDE's toolbar. You
 - Android app: `./gradlew :androidApp:assembleDebug`
 - iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
-The Android app uses CameraX and MediaPipe Pose Landmarker with the bundled full model. It sends 12 pose points to the push-up counter in `shared/commonMain`. The iOS entry point and shared starter UI are unchanged.
+The Android app uses CameraX and MediaPipe Pose Landmarker. The iOS app uses AVFoundation and MediaPipe Pose Landmarker. Both apps use the bundled full model and send the same 12 pose points to the push-up counter in `shared/commonMain`. To run iOS on a phone, open `iosApp/iosApp.xcodeproj` in Xcode, select a development team, connect an iPhone with iOS 18.2 or newer, and run the `iosApp` scheme.
 
 ### Running tests
 

@@ -4,5 +4,7 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Камера нужна для распознавания позы и подсчета отжиманий.</string>
 </dict>
 </plist>
