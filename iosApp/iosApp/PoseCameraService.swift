@@ -4,23 +4,30 @@ import MediaPipeTasksVision
 import Shared
 import UIKit
 
-final class PoseCameraService: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-    @Published private(set) var reps = 0
-    @Published private(set) var status = "Запуск камеры"
-
+final class PoseCameraService: NSObject, ObservableObject, IosCameraSource, AVCaptureVideoDataOutputSampleBufferDelegate {
     let session = AVCaptureSession()
 
     private let sessionQueue = DispatchQueue(label: "app.pushups.ios.camera.session")
     private let frameQueue = DispatchQueue(label: "app.pushups.ios.camera.frames")
     private let output = AVCaptureVideoDataOutput()
-    private let counter = PushupCounter()
     private let pointIndices = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
+    private var listener: PoseListener?
+    private var errorListener: ((String) -> Void)?
     private var landmarker: PoseLandmarker?
     private var configured = false
     private var lastTimestamp = 0
     private var shouldRun = false
 
-    func start() {
+    func start(listener: PoseListener) {
+        self.listener = listener
+        resume()
+    }
+
+    func setErrorListener(listener: @escaping (String) -> Void) {
+        errorListener = listener
+    }
+
+    func resume() {
         shouldRun = true
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -32,12 +39,12 @@ final class PoseCameraService: NSObject, ObservableObject, AVCaptureVideoDataOut
                     if allowed {
                         self.startSession()
                     } else {
-                        self.setStatus("Разрешите доступ к камере в настройках")
+                        self.reportError("Разрешите доступ к камере в настройках")
                     }
                 }
             }
         default:
-            setStatus("Разрешите доступ к камере в настройках")
+            reportError("Разрешите доступ к камере в настройках")
         }
     }
 
@@ -60,9 +67,8 @@ final class PoseCameraService: NSObject, ObservableObject, AVCaptureVideoDataOut
                     self.session.startRunning()
                 }
                 guard self.session.isRunning else { throw CameraError.cameraUnavailable }
-                self.setStatus("Нет человека в кадре")
             } catch {
-                self.setStatus(error.localizedDescription)
+                self.reportError(error.localizedDescription)
             }
         }
     }
@@ -158,19 +164,17 @@ final class PoseCameraService: NSObject, ObservableObject, AVCaptureVideoDataOut
                 imageHeight: Int32(height),
                 landmarks: points
             )
-            let state = counter.onFrame(frame_: frame)
             DispatchQueue.main.async { [weak self] in
-                self?.reps = Int(state.reps)
-                self?.status = points == nil ? "Нет человека в кадре" : "Поза обнаружена"
+                self?.listener?.onFrame(frame: frame)
             }
         } catch {
-            setStatus(error.localizedDescription)
+            reportError(error.localizedDescription)
         }
     }
 
-    private func setStatus(_ value: String) {
+    private func reportError(_ value: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.status = value
+            self?.errorListener?(value)
         }
     }
 }

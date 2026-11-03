@@ -1,4 +1,4 @@
-import AVFoundation
+import Shared
 import SwiftUI
 
 struct ContentView: View {
@@ -6,50 +6,24 @@ struct ContentView: View {
     @StateObject private var camera = PoseCameraService()
 
     var body: some View {
-        ZStack(alignment: .top) {
-            CameraPreviewView(session: camera.session)
-                .ignoresSafeArea()
-
-            VStack(spacing: 8) {
-                Text("Отжимания: \(camera.reps)")
-                    .font(.title.bold())
-                Text(camera.status)
-                    .font(.body)
+        ComposeWorkoutView(camera: camera)
+            .ignoresSafeArea()
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    camera.resume()
+                } else {
+                    camera.stop()
+                }
             }
-            .foregroundStyle(.white)
-            .padding(16)
-            .background(.black.opacity(0.65), in: RoundedRectangle(cornerRadius: 16))
-            .padding(.top, 20)
-        }
-        .onAppear { camera.start() }
-        .onDisappear { camera.stop() }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active {
-                camera.start()
-            } else {
-                camera.stop()
-            }
-        }
     }
 }
 
-private struct CameraPreviewView: UIViewRepresentable {
-    let session: AVCaptureSession
+private struct ComposeWorkoutView: UIViewControllerRepresentable {
+    let camera: PoseCameraService
 
-    func makeUIView(context: Context) -> CameraPreview {
-        let view = CameraPreview()
-        view.previewLayer.session = session
-        view.previewLayer.videoGravity = .resizeAspectFill
-        return view
+    func makeUIViewController(context: Context) -> UIViewController {
+        MainViewControllerKt.MainViewController(source: camera)
     }
 
-    func updateUIView(_ uiView: CameraPreview, context: Context) {}
-}
-
-private final class CameraPreview: UIView {
-    override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
-
-    var previewLayer: AVCaptureVideoPreviewLayer {
-        layer as! AVCaptureVideoPreviewLayer
-    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }

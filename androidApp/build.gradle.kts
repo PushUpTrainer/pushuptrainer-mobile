@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":shared"))
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.foundation)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
