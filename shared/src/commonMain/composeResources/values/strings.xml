@@ -28,4 +28,19 @@
     <!-- После «из» форма для 2–4 такая же, как для 5+: «из 3 повторений» -->
     <string name="training_result_of_goal_repetitions_one">из %1$d повторения</string>
     <string name="training_result_of_goal_repetitions_many">из %1$d повторений</string>
+    <!-- Экран подготовки к тренировке -->
+    <string name="preparation_title">Подготовка</string>
+    <string name="preparation_subtitle">Выберите режим тренировки</string>
+    <string name="preparation_mode_with_goal">С целью</string>
+    <string name="preparation_mode_without_goal">Без цели</string>
+    <string name="preparation_goal_card_title">Цель тренировки</string>
+    <string name="preparation_repetitions_one">повторение</string>
+    <string name="preparation_repetitions_few">повторения</string>
+    <string name="preparation_repetitions_many">повторений</string>
+    <string name="preparation_no_goal_title">Тренировка без цели</string>
+    <string name="preparation_no_goal_description">Повторения считаются без лимита. Завершите тренировку вручную.</string>
+    <string name="preparation_how_to_place_title">Как поставить телефон</string>
+    <string name="preparation_how_to_place_subtitle">Положение камеры и тела</string>
+    <string name="preparation_pose_placeholder">Иллюстрация позы\n(добавить ресурс из Figma)</string>
+    <string name="preparation_start">Начать тренировку</string>
 </resources>
