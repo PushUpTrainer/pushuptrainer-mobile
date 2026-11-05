@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.features.trainingresult.presentation.components
+package com.example.pushuptrainer_mobile.core.uikit.components.trainingSavedCard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

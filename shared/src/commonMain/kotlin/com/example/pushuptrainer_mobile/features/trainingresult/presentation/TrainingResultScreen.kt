@@ -29,16 +29,17 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pushuptrainer_mobile.core.uikit.components.AppBottomBar
-import com.example.pushuptrainer_mobile.core.uikit.components.AppBottomBarDestination
-import com.example.pushuptrainer_mobile.core.uikit.components.AppPrimaryButton
-import com.example.pushuptrainer_mobile.core.uikit.components.AppSecondaryButton
-import com.example.pushuptrainer_mobile.core.uikit.components.StreakCard
-import com.example.pushuptrainer_mobile.core.uikit.components.ThemeToggleButton
+import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationBar
+import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import com.example.pushuptrainer_mobile.core.uikit.components.primaryButton.AppPrimaryButton
+import com.example.pushuptrainer_mobile.core.uikit.components.secondaryButton.AppSecondaryButton
+import com.example.pushuptrainer_mobile.core.uikit.components.streakCard.StreakCard
+import com.example.pushuptrainer_mobile.core.uikit.components.themeToggleButton.ThemeToggleButton
+import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingOutcomeUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingResultSummaryCard
+import com.example.pushuptrainer_mobile.core.uikit.components.trainingSavedCard.TrainingSavedCard
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
-import com.example.pushuptrainer_mobile.features.trainingresult.presentation.components.TrainingResultSummaryCard
-import com.example.pushuptrainer_mobile.features.trainingresult.presentation.components.TrainingSavedCard
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
@@ -99,8 +100,8 @@ fun TrainingResultScreen(
                 modifier = Modifier.weight(1f),
             )
         }
-        AppBottomBar(
-            selected = AppBottomBarDestination.Trainer,
+        BottomNavigationBar(
+            selected = BottomNavigationDestination.Trainer,
             onDestinationClick = { onEvent(TrainingResultUiEvent.BottomBarDestinationClicked(it)) },
         )
     }

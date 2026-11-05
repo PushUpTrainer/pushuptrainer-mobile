@@ -1,6 +1,8 @@
 package com.example.pushuptrainer_mobile.features.trainingresult.presentation
 
-import com.example.pushuptrainer_mobile.core.uikit.components.StreakCardUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.streakCard.StreakCardUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingOutcomeUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingResultSummaryUiModel
 
 /** Тестовые данные для Preview экрана результата (значения из макета Figma). */
 internal object TrainingResultPreviewData {

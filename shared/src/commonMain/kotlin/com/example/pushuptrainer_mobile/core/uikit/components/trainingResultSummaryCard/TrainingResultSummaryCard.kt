@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.features.trainingresult.presentation.components
+package com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,9 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.text.russianPluralString
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
-import com.example.pushuptrainer_mobile.features.trainingresult.presentation.TrainingOutcomeUiModel
-import com.example.pushuptrainer_mobile.features.trainingresult.presentation.TrainingResultPreviewData
-import com.example.pushuptrainer_mobile.features.trainingresult.presentation.TrainingResultSummaryUiModel
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
 import pushuptrainermobile.shared.generated.resources.training_result_of_goal_repetitions_many
@@ -179,11 +176,17 @@ private fun SummaryCardPreviewContent() {
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            TrainingResultSummaryCard(model = TrainingResultPreviewData.noGoal.summary)
-            TrainingResultSummaryCard(model = TrainingResultPreviewData.goalReached.summary)
-            TrainingResultSummaryCard(model = TrainingResultPreviewData.stoppedEarly.summary)
             TrainingResultSummaryCard(
-                model = TrainingResultPreviewData.goalReached.summary,
+                model = TrainingResultSummaryUiModel(16, TrainingOutcomeUiModel.NoGoal),
+            )
+            TrainingResultSummaryCard(
+                model = TrainingResultSummaryUiModel(16, TrainingOutcomeUiModel.GoalReached(goal = 16)),
+            )
+            TrainingResultSummaryCard(
+                model = TrainingResultSummaryUiModel(16, TrainingOutcomeUiModel.StoppedEarly(goal = 20)),
+            )
+            TrainingResultSummaryCard(
+                model = TrainingResultSummaryUiModel(16, TrainingOutcomeUiModel.GoalReached(goal = 16)),
                 iconAppearance = 0f,
             )
         }

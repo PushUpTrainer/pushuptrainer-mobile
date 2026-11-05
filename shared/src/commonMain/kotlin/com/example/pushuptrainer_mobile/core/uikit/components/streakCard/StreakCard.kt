@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.core.uikit.components
+package com.example.pushuptrainer_mobile.core.uikit.components.streakCard
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseOut
@@ -27,8 +27,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.text.russianPluralString
+import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -38,11 +38,6 @@ import pushuptrainermobile.shared.generated.resources.streak_caption
 import pushuptrainermobile.shared.generated.resources.streak_days_in_row_few
 import pushuptrainermobile.shared.generated.resources.streak_days_in_row_many
 import pushuptrainermobile.shared.generated.resources.streak_days_in_row_one
-
-/** Данные карточки серии тренировок. */
-data class StreakCardUiModel(
-    val daysInRow: Int,
-)
 
 private const val HighlightDurationMillis = 360
 

@@ -1,6 +1,6 @@
 package com.example.pushuptrainer_mobile.features.trainingresult.presentation
 
-import com.example.pushuptrainer_mobile.core.uikit.components.AppBottomBarDestination
+import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
 
 /** Действия пользователя на экране результата тренировки. */
 sealed interface TrainingResultUiEvent {
@@ -16,6 +16,6 @@ sealed interface TrainingResultUiEvent {
 
     /** Выбран раздел в нижней навигации. */
     data class BottomBarDestinationClicked(
-        val destination: AppBottomBarDestination,
+        val destination: BottomNavigationDestination,
     ) : TrainingResultUiEvent
 }

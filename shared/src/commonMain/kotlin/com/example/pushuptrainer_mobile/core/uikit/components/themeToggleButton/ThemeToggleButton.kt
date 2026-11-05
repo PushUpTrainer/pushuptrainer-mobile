@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.core.uikit.components
+package com.example.pushuptrainer_mobile.core.uikit.components.themeToggleButton
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
