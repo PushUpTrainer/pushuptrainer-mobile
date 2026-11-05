@@ -15,13 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 import pushuptrainermobile.shared.generated.resources.Res
 import pushuptrainermobile.shared.generated.resources.compose_multiplatform
 
 @Composable
-@Preview
-fun App() {
+fun App(greeting: Greeting = koinInject()) {
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
@@ -35,15 +35,21 @@ fun App() {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
+                val greetingText = remember(greeting) { greeting.greet() }
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+                    Text("Compose: $greetingText")
                 }
             }
         }
     }
+}
+
+@Composable
+@Preview
+private fun AppPreview() {
+    App(greeting = Greeting())
 }
