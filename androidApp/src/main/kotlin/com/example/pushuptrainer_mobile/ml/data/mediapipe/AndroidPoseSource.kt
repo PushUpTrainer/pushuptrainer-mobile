@@ -28,15 +28,21 @@ class AndroidPoseSource(
 ) : PoseSource {
     private val context = previewView.context
     private val mainExecutor = ContextCompat.getMainExecutor(context)
-    private val cameraExecutor = Executors.newSingleThreadExecutor()
-    private var cameraProvider: ProcessCameraProvider? = null
-    private var landmarker: PoseLandmarker? = null
-    private var lastInputTimestamp = 0L
-    @Volatile private var active = false
+    @Volatile private var session: Session? = null
+
+    private class Session {
+        val executor = Executors.newSingleThreadExecutor()
+        var cameraProvider: ProcessCameraProvider? = null
+        var preview: Preview? = null
+        var analysis: ImageAnalysis? = null
+        var landmarker: PoseLandmarker? = null
+        var lastInputTimestamp = 0L
+    }
 
     override fun start(listener: PoseListener) {
-        if (active) return
-        active = true
+        if (session != null) return
+        val current = Session()
+        session = current
         try {
             val options = PoseLandmarker.PoseLandmarkerOptions.builder()
                 .setBaseOptions(BaseOptions.builder().setModelAssetPath("pose_landmarker_full.task").build())
@@ -55,37 +61,40 @@ class AndroidPoseSource(
                         }
                     }
                     val frame = PoseFrame(result.timestampMs(), image.width, image.height, points)
-                    mainExecutor.execute { if (active) listener.onFrame(frame) }
+                    mainExecutor.execute { if (session === current) listener.onFrame(frame) }
                 }
-                .setErrorListener { error -> mainExecutor.execute { if (active) onError(error.message ?: "Ошибка модели") } }
+                .setErrorListener { error -> mainExecutor.execute { if (session === current) onError(error.message ?: "Ошибка модели") } }
                 .build()
-            landmarker = PoseLandmarker.createFromOptions(context, options)
+            current.landmarker = PoseLandmarker.createFromOptions(context, options)
             val future = ProcessCameraProvider.getInstance(context)
             future.addListener({
-                if (!active) return@addListener
+                if (session !== current) return@addListener
                 try {
                     val provider = future.get()
-                    cameraProvider = provider
+                    current.cameraProvider = provider
                     val preview = Preview.Builder().build().also { it.surfaceProvider = previewView.surfaceProvider }
                     val analysis = ImageAnalysis.Builder()
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build()
-                    analysis.setAnalyzer(cameraExecutor) { image -> analyze(image) }
-                    provider.unbindAll()
+                    current.preview = preview
+                    current.analysis = analysis
+                    analysis.setAnalyzer(current.executor) { image -> analyze(image, current) }
                     provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis)
                 } catch (error: Exception) {
+                    stop()
                     onError(error.message ?: "Камера недоступна")
                 }
             }, mainExecutor)
         } catch (error: Exception) {
-            active = false
+            stop()
             onError(error.message ?: "Модель не запустилась")
         }
     }
 
-    private fun analyze(image: ImageProxy) {
+    private fun analyze(image: ImageProxy, current: Session) {
         try {
+            if (session !== current) return
             val bitmap = Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
             image.planes[0].buffer.rewind()
             bitmap.copyPixelsFromBuffer(image.planes[0].buffer)
@@ -94,22 +103,26 @@ class AndroidPoseSource(
                 bitmap, 0, 0, bitmap.width, bitmap.height,
                 Matrix().apply { postRotate(rotation.toFloat()) }, true,
             )
-            val timestamp = maxOf(image.imageInfo.timestamp / 1_000_000, lastInputTimestamp + 1)
-            lastInputTimestamp = timestamp
-            if (active) landmarker?.detectAsync(BitmapImageBuilder(upright).build(), timestamp)
+            val timestamp = maxOf(image.imageInfo.timestamp / 1_000_000, current.lastInputTimestamp + 1)
+            current.lastInputTimestamp = timestamp
+            if (session === current) current.landmarker?.detectAsync(BitmapImageBuilder(upright).build(), timestamp)
         } catch (error: Exception) {
-            mainExecutor.execute { if (active) onError(error.message ?: "Ошибка обработки кадра") }
+            mainExecutor.execute { if (session === current) onError(error.message ?: "Ошибка обработки кадра") }
         } finally {
             image.close()
         }
     }
 
     override fun stop() {
-        active = false
-        cameraProvider?.unbindAll()
-        cameraProvider = null
-        cameraExecutor.shutdown()
-        landmarker?.close()
-        landmarker = null
+        val current = session ?: return
+        session = null
+        try {
+            current.analysis?.clearAnalyzer()
+            val useCases = listOfNotNull(current.preview, current.analysis).toTypedArray()
+            current.cameraProvider?.unbind(*useCases)
+        } finally {
+            current.executor.execute { current.landmarker?.close() }
+            current.executor.shutdown()
+        }
     }
 }
