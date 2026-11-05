@@ -1,14 +1,14 @@
-package app.pushups.logic
+package com.example.pushuptrainer_mobile.ml.domain.analysis
 
-import app.pushups.contract.BodyPoint
-import app.pushups.contract.Hint
-import app.pushups.contract.Landmark
-import app.pushups.contract.Phase
-import app.pushups.contract.PoseFrame
-import app.pushups.contract.PushupAnalyzer
-import app.pushups.contract.PushupState
-import app.pushups.contract.TechniqueError
-import app.pushups.contract.WorkoutSummary
+import com.example.pushuptrainer_mobile.ml.domain.model.BodyPoint
+import com.example.pushuptrainer_mobile.ml.domain.model.Hint
+import com.example.pushuptrainer_mobile.ml.domain.model.Landmark
+import com.example.pushuptrainer_mobile.ml.domain.model.Phase
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.PushupAnalyzer
+import com.example.pushuptrainer_mobile.ml.domain.model.PushupState
+import com.example.pushuptrainer_mobile.ml.domain.model.TechniqueError
+import com.example.pushuptrainer_mobile.ml.domain.model.WorkoutSummary
 import kotlin.math.hypot
 
 internal data class CounterSnapshot(

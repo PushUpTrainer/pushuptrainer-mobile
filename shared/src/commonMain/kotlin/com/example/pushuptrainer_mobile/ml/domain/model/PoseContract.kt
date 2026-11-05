@@ -1,4 +1,4 @@
-package app.pushups.contract
+package com.example.pushuptrainer_mobile.ml.domain.model
 
 data class Landmark(
     val x: Float,

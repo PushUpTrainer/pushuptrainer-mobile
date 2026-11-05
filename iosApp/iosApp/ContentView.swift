@@ -1,29 +1,18 @@
-import Shared
+import UIKit
 import SwiftUI
+import Shared
 
-struct ContentView: View {
-    @Environment(\.scenePhase) private var scenePhase
-    @StateObject private var camera = PoseCameraService()
-
-    var body: some View {
-        ComposeWorkoutView(camera: camera)
-            .ignoresSafeArea()
-            .onChange(of: scenePhase) { _, phase in
-                if phase == .active {
-                    camera.resume()
-                } else {
-                    camera.stop()
-                }
-            }
+struct ComposeView: UIViewControllerRepresentable {
+    func makeUIViewController(context: Self.Context) -> UIViewController {
+        MainViewControllerKt.MainViewController()
     }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Self.Context) {}
 }
 
-private struct ComposeWorkoutView: UIViewControllerRepresentable {
-    let camera: PoseCameraService
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController(source: camera)
+struct ContentView: View {
+    var body: some View {
+        ComposeView()
+            .ignoresSafeArea()
     }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }

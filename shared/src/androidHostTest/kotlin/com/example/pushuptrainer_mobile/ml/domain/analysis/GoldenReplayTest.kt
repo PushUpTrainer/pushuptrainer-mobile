@@ -1,10 +1,10 @@
-package app.pushups.logic
+package com.example.pushuptrainer_mobile.ml.domain.analysis
 
-import app.pushups.contract.Hint
-import app.pushups.contract.Landmark
-import app.pushups.contract.Phase
-import app.pushups.contract.PoseFrame
-import app.pushups.contract.TechniqueError
+import com.example.pushuptrainer_mobile.ml.domain.model.Hint
+import com.example.pushuptrainer_mobile.ml.domain.model.Landmark
+import com.example.pushuptrainer_mobile.ml.domain.model.Phase
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.TechniqueError
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.test.Test

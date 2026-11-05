@@ -1,8 +1,7 @@
-package com.example.pushuptrainer_mobile
+package com.example.pushuptrainer_mobile.ml.data.mediapipe
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.os.SystemClock
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -11,11 +10,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import app.pushups.contract.BodyPoint
-import app.pushups.contract.Landmark
-import app.pushups.contract.PoseFrame
-import app.pushups.contract.PoseListener
-import app.pushups.contract.PoseSource
+import com.example.pushuptrainer_mobile.ml.domain.model.BodyPoint
+import com.example.pushuptrainer_mobile.ml.domain.model.Landmark
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseListener
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseSource
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
@@ -95,7 +94,7 @@ class AndroidPoseSource(
                 bitmap, 0, 0, bitmap.width, bitmap.height,
                 Matrix().apply { postRotate(rotation.toFloat()) }, true,
             )
-            val timestamp = maxOf(SystemClock.uptimeMillis(), lastInputTimestamp + 1)
+            val timestamp = maxOf(image.imageInfo.timestamp / 1_000_000, lastInputTimestamp + 1)
             lastInputTimestamp = timestamp
             if (active) landmarker?.detectAsync(BitmapImageBuilder(upright).build(), timestamp)
         } catch (error: Exception) {

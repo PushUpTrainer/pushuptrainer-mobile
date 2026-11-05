@@ -1,16 +1,18 @@
 import AVFoundation
-import Combine
 import MediaPipeTasksVision
 import Shared
 import UIKit
 
-final class PoseCameraService: NSObject, ObservableObject, IosCameraSource, AVCaptureVideoDataOutputSampleBufferDelegate {
+final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSampleBufferDelegate, PoseLandmarkerLiveStreamDelegate {
     let session = AVCaptureSession()
 
-    private let sessionQueue = DispatchQueue(label: "app.pushups.ios.camera.session")
-    private let frameQueue = DispatchQueue(label: "app.pushups.ios.camera.frames")
+    private let sessionQueue = DispatchQueue(label: "com.example.pushuptrainer_mobile.ios.camera.session")
+    private let frameQueue = DispatchQueue(label: "com.example.pushuptrainer_mobile.ios.camera.frames")
     private let output = AVCaptureVideoDataOutput()
+    private let frameLock = NSLock()
     private let pointIndices = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
+    private var frameDimensions: [Int: (Int32, Int32)] = [:]
+    private var frameTimestamps: [Int] = []
     private var listener: PoseListener?
     private var errorListener: ((String) -> Void)?
     private var landmarker: PoseLandmarker?
@@ -80,7 +82,8 @@ final class PoseCameraService: NSObject, ObservableObject, IosCameraSource, AVCa
 
         let options = PoseLandmarkerOptions()
         options.baseOptions.modelAssetPath = modelPath
-        options.runningMode = .video
+        options.runningMode = .liveStream
+        options.poseLandmarkerLiveStreamDelegate = self
         options.numPoses = 1
         options.minPoseDetectionConfidence = 0.5
         options.minPosePresenceConfidence = 0.5
@@ -111,7 +114,7 @@ final class PoseCameraService: NSObject, ObservableObject, IosCameraSource, AVCa
             }
             if connection.isVideoMirroringSupported {
                 connection.automaticallyAdjustsVideoMirroring = false
-                connection.isVideoMirrored = true
+                connection.isVideoMirrored = false
             }
         }
 
@@ -121,54 +124,67 @@ final class PoseCameraService: NSObject, ObservableObject, IosCameraSource, AVCa
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let landmarker, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
-        let orientation: UIImage.Orientation
-        switch UIDevice.current.orientation {
-        case .landscapeLeft:
-            orientation = .left
-        case .landscapeRight:
-            orientation = .right
-        default:
-            orientation = .up
-        }
-
-        let rawWidth = CVPixelBufferGetWidth(pixelBuffer)
-        let rawHeight = CVPixelBufferGetHeight(pixelBuffer)
-        let rotated = orientation == .left || orientation == .right
-        let width = rotated ? rawHeight : rawWidth
-        let height = rotated ? rawWidth : rawHeight
-        let timestamp = max(Int(ProcessInfo.processInfo.systemUptime * 1000), lastTimestamp + 1)
+        let width = Int32(CVPixelBufferGetWidth(pixelBuffer))
+        let height = Int32(CVPixelBufferGetHeight(pixelBuffer))
+        let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        guard presentationTime.isValid else { return }
+        let timestamp = max(Int(CMTimeGetSeconds(presentationTime) * 1000), lastTimestamp + 1)
         lastTimestamp = timestamp
 
         do {
-            let image = try MPImage(sampleBuffer: sampleBuffer, orientation: orientation)
-            let result = try landmarker.detect(videoFrame: image, timestampInMilliseconds: timestamp)
-            let points: [Shared.Landmark]?
-            if let pose = result.landmarks.first, pose.count > 28 {
-                points = pointIndices.map { index in
-                    let point = pose[index]
-                    return Shared.Landmark(
-                        x: point.x,
-                        y: point.y,
-                        z: point.z,
-                        visibility: point.visibility?.floatValue ?? 0,
-                        presence: point.presence?.floatValue ?? 0
-                    )
-                }
-            } else {
-                points = nil
+            let image = try MPImage(sampleBuffer: sampleBuffer, orientation: .up)
+            frameLock.lock()
+            frameDimensions[timestamp] = (width, height)
+            frameTimestamps.append(timestamp)
+            if frameTimestamps.count > 120 {
+                frameDimensions.removeValue(forKey: frameTimestamps.removeFirst())
             }
-
-            let frame = PoseFrame(
-                timestampMs: Int64(timestamp),
-                imageWidth: Int32(width),
-                imageHeight: Int32(height),
-                landmarks: points
-            )
-            DispatchQueue.main.async { [weak self] in
-                self?.listener?.onFrame(frame: frame)
-            }
+            frameLock.unlock()
+            try landmarker.detectAsync(image: image, timestampInMilliseconds: timestamp)
         } catch {
+            frameLock.lock()
+            frameDimensions.removeValue(forKey: timestamp)
+            frameLock.unlock()
             reportError(error.localizedDescription)
+        }
+    }
+
+    func poseLandmarker(_ poseLandmarker: PoseLandmarker, didFinishDetection result: PoseLandmarkerResult?, timestampInMilliseconds timestamp: Int, error: (any Error)?) {
+        if let error {
+            reportError(error.localizedDescription)
+            return
+        }
+
+        frameLock.lock()
+        let dimensions = frameDimensions.removeValue(forKey: timestamp)
+        frameLock.unlock()
+        guard let dimensions else { return }
+
+        let points: [Shared.Landmark]?
+        if let pose = result?.landmarks.first, pose.count > 28 {
+            points = pointIndices.map { index in
+                let point = pose[index]
+                return Shared.Landmark(
+                    x: point.x,
+                    y: point.y,
+                    z: point.z,
+                    visibility: point.visibility?.floatValue ?? 0,
+                    presence: point.presence?.floatValue ?? 0
+                )
+            }
+        } else {
+            points = nil
+        }
+
+        let frame = PoseFrame(
+            timestampMs: Int64(timestamp),
+            imageWidth: dimensions.0,
+            imageHeight: dimensions.1,
+            landmarks: points
+        )
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.shouldRun else { return }
+            self.listener?.onFrame(frame_: frame)
         }
     }
 
