@@ -1,0 +1,7 @@
+<resources>
+    <string name="workout_repetitions">Повторения</string>
+    <string name="workout_free_mode">∞ Без цели</string>
+    <string name="workout_goal_mode">С целью</string>
+    <string name="workout_finish">Завершить</string>
+    <string name="workout_finish_early">Завершить досрочно</string>
+</resources>
