@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,8 +25,11 @@ import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.text.russianPluralString
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
+import pushuptrainermobile.shared.generated.resources.ic_check
+import pushuptrainermobile.shared.generated.resources.ic_stop
 import pushuptrainermobile.shared.generated.resources.training_result_of_goal_repetitions_many
 import pushuptrainermobile.shared.generated.resources.training_result_of_goal_repetitions_one
 import pushuptrainermobile.shared.generated.resources.training_result_repetitions_few
@@ -107,17 +111,18 @@ private fun OutcomeIcon(
         when (outcome) {
             TrainingOutcomeUiModel.NoGoal,
             is TrainingOutcomeUiModel.GoalReached,
-            -> Text(
-                text = "✓",
-                style = AppTheme.typography.iconGlyph,
-                color = AppTheme.colors.accentContainer,
+            -> Icon(
+                painter = painterResource(Res.drawable.ic_check),
+                contentDescription = null,
+                tint = AppTheme.colors.accentContainer,
+                modifier = Modifier.size(28.dp),
             )
 
-            is TrainingOutcomeUiModel.StoppedEarly -> Box(
-                modifier = Modifier
-                    .size(16.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(AppTheme.colors.accentContainer),
+            is TrainingOutcomeUiModel.StoppedEarly -> Icon(
+                painter = painterResource(Res.drawable.ic_stop),
+                contentDescription = null,
+                tint = AppTheme.colors.accentContainer,
+                modifier = Modifier.size(16.dp),
             )
         }
     }

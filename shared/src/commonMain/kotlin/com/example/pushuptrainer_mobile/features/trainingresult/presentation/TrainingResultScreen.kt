@@ -209,7 +209,10 @@ private fun TrainingResultHeader(
                 color = AppTheme.colors.textPrimary,
                 modifier = Modifier.weight(1f),
             )
-            ThemeToggleButton(onClick = onThemeToggleClick)
+            ThemeToggleButton(
+                isDarkTheme = AppTheme.isDarkTheme,
+                onClick = onThemeToggleClick,
+            )
         }
         if (subtitle != null) {
             Spacer(Modifier.height(6.dp))

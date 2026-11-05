@@ -20,12 +20,19 @@ import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
+import pushuptrainermobile.shared.generated.resources.ic_theme_moon
 import pushuptrainermobile.shared.generated.resources.ic_theme_sun
 import pushuptrainermobile.shared.generated.resources.theme_toggle
 
-/** Кнопка «Тема» в шапке экрана: переключает светлую/тёмную тему. */
+/**
+ * Кнопка «Тема» в шапке экрана: переключает светлую/тёмную тему.
+ *
+ * @param isDarkTheme текущая тема. В светлой теме на кнопке луна (переключить на тёмную),
+ * в тёмной — солнце (переключить на светлую).
+ */
 @Composable
 fun ThemeToggleButton(
+    isDarkTheme: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -42,7 +49,9 @@ fun ThemeToggleButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(Res.drawable.ic_theme_sun),
+                painter = painterResource(
+                    if (isDarkTheme) Res.drawable.ic_theme_sun else Res.drawable.ic_theme_moon,
+                ),
                 contentDescription = null,
                 tint = AppTheme.colors.accentText,
                 modifier = Modifier.size(20.dp),
@@ -61,7 +70,7 @@ fun ThemeToggleButton(
 private fun ThemeToggleButtonLightPreview() {
     PushUpTrainerTheme(darkTheme = false) {
         Surface(color = AppTheme.colors.background) {
-            ThemeToggleButton(onClick = {}, modifier = Modifier.padding(20.dp))
+            ThemeToggleButton(isDarkTheme = false, onClick = {}, modifier = Modifier.padding(20.dp))
         }
     }
 }
@@ -71,7 +80,7 @@ private fun ThemeToggleButtonLightPreview() {
 private fun ThemeToggleButtonDarkPreview() {
     PushUpTrainerTheme(darkTheme = true) {
         Surface(color = AppTheme.colors.background) {
-            ThemeToggleButton(onClick = {}, modifier = Modifier.padding(20.dp))
+            ThemeToggleButton(isDarkTheme = true, onClick = {}, modifier = Modifier.padding(20.dp))
         }
     }
 }
