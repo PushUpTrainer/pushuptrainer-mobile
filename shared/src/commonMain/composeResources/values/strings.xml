@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- UI kit -->
+    <string name="theme_toggle">Тема</string>
+    <string name="bottom_bar_trainer">Тренажёр</string>
+    <string name="bottom_bar_progress">Прогресс</string>
+    <string name="bottom_bar_about">О проекте</string>
+    <string name="streak_caption">Серия тренировок</string>
+    <string name="streak_days_in_row_one">%1$d день подряд</string>
+    <string name="streak_days_in_row_few">%1$d дня подряд</string>
+    <string name="streak_days_in_row_many">%1$d дней подряд</string>
+
+    <!-- Экран результата тренировки -->
+    <string name="training_result_title">Результат</string>
+    <string name="training_result_subtitle_no_goal">Тренировка завершена</string>
+    <string name="training_result_subtitle_goal_reached">Цель достигнута</string>
+    <string name="training_result_subtitle_stopped_early">Завершена досрочно</string>
+    <string name="training_result_status_no_goal">∞ Без цели</string>
+    <string name="training_result_status_goal_reached">Цель выполнена</string>
+    <string name="training_result_status_stopped_early">Прекращено до завершения</string>
+    <string name="training_result_saved_title">Тренировка сохранена</string>
+    <string name="training_result_saved_body">Результат добавлен в статистику.</string>
+    <string name="training_result_start_new">Начать новую тренировку</string>
+    <string name="training_result_go_to_main">На главный экран</string>
+    <string name="training_result_repetitions_one">повторение</string>
+    <string name="training_result_repetitions_few">повторения</string>
+    <string name="training_result_repetitions_many">повторений</string>
+    <!-- После «из» форма для 2–4 такая же, как для 5+: «из 3 повторений» -->
+    <string name="training_result_of_goal_repetitions_one">из %1$d повторения</string>
+    <string name="training_result_of_goal_repetitions_many">из %1$d повторений</string>
+    <!-- Экран подготовки к тренировке -->
+    <string name="preparation_title">Подготовка</string>
+    <string name="preparation_subtitle">Выберите режим тренировки</string>
+    <string name="preparation_mode_with_goal">С целью</string>
+    <string name="preparation_mode_without_goal">Без цели</string>
+    <string name="preparation_goal_card_title">Цель тренировки</string>
+    <string name="preparation_repetitions_one">повторение</string>
+    <string name="preparation_repetitions_few">повторения</string>
+    <string name="preparation_repetitions_many">повторений</string>
+    <string name="preparation_no_goal_title">Тренировка без цели</string>
+    <string name="preparation_no_goal_description">Повторения считаются без лимита. Завершите тренировку вручную.</string>
+    <string name="preparation_how_to_place_title">Как поставить телефон</string>
+    <string name="preparation_how_to_place_subtitle">Положение камеры и тела</string>
+    <string name="preparation_pose_placeholder">Иллюстрация позы\n(добавить ресурс из Figma)</string>
+    <string name="preparation_start">Начать тренировку</string>
+</resources>
