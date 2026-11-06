@@ -1,10 +1,13 @@
-package com.example.pushuptrainer_mobile.data.local
+package com.example.pushuptrainer_mobile.data.local.database
 
 import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.example.pushuptrainer_mobile.data.local.database.dao.WorkoutSessionDao
+import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutSessionEntity
+import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutErrorEntity
 
 @Database(
     entities = [WorkoutSessionEntity::class, WorkoutErrorEntity::class],

@@ -1,10 +1,13 @@
-package com.example.pushuptrainer_mobile.data.local
+package com.example.pushuptrainer_mobile.data.local.database.dao
 
 import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
+import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutSessionEntity
+import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutErrorEntity
+import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutSessionWithErrors
 import kotlinx.coroutines.flow.Flow
 
 @Dao

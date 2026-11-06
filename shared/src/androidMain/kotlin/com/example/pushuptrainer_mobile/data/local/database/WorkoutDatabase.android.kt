@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.data.local
+package com.example.pushuptrainer_mobile.data.local.database
 
 import android.content.Context
 import androidx.room3.Room

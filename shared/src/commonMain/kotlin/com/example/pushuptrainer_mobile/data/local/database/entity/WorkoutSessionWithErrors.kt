@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.data.local
+package com.example.pushuptrainer_mobile.data.local.database.entity
 
 import androidx.room3.Embedded
 import androidx.room3.Relation
