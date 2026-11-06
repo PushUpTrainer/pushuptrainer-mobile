@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.features.workout.presentation.components
+package com.example.pushuptrainer_mobile.core.uikit.components.workoutCounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
-import com.example.pushuptrainer_mobile.features.workout.presentation.WorkoutCounterUiModel
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
 import pushuptrainermobile.shared.generated.resources.workout_free_mode

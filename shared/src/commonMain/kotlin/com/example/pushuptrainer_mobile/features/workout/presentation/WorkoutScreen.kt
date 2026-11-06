@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.components.primaryButton.AppPrimaryButton
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
-import com.example.pushuptrainer_mobile.features.workout.presentation.components.WorkoutCounter
-import com.example.pushuptrainer_mobile.features.workout.presentation.components.WorkoutHint
+import com.example.pushuptrainer_mobile.core.uikit.components.workoutCounter.WorkoutCounter
+import com.example.pushuptrainer_mobile.core.uikit.components.workoutHint.WorkoutHint
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
 import pushuptrainermobile.shared.generated.resources.workout_finish
@@ -55,11 +55,13 @@ fun WorkoutScreen(
                     modifier = Modifier.widthIn(max = 240.dp).fillMaxWidth(),
                 )
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
-                    WorkoutHint(state.hint, Modifier.fillMaxWidth())
-                    Spacer(Modifier.height(32.dp))
+                    state.hint?.let { hint ->
+                        WorkoutHint(hint, Modifier.fillMaxWidth())
+                        Spacer(Modifier.height(32.dp))
+                    }
                     AppPrimaryButton(
                         text = stringResource(
-                            if (state.counter is WorkoutCounterUiModel.Goal) Res.string.workout_finish_early
+                            if (state.mode is WorkoutModeUiModel.Goal) Res.string.workout_finish_early
                             else Res.string.workout_finish,
                         ),
                         onClick = { onEvent(WorkoutUiEvent.FinishClicked) },

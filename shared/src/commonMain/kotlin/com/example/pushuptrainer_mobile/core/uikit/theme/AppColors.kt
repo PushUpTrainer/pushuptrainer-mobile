@@ -4,6 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Цветовые токены приложения по макету Figma «Тренажёр отжиманий».
+ */
 @Immutable
 data class AppColors(
     val background: Color,

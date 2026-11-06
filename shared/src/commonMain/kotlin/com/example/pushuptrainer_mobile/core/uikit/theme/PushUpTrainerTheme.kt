@@ -9,8 +9,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
+/** Включена ли сейчас тёмная тема. */
 val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
+/**
+ * Тема приложения: светлая и тёмная палитры из макета Figma.
+ */
 @Composable
 fun PushUpTrainerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -51,6 +55,7 @@ fun PushUpTrainerTheme(
     }
 }
 
+/** Доступ к теме: `AppTheme.colors`, `AppTheme.typography`, `AppTheme.isDarkTheme`. */
 object AppTheme {
     val colors: AppColors
         @Composable

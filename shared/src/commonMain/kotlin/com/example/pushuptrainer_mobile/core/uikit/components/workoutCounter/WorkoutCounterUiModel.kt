@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.features.workout.presentation
+package com.example.pushuptrainer_mobile.core.uikit.components.workoutCounter
 
 sealed interface WorkoutCounterUiModel {
     val repetitions: String

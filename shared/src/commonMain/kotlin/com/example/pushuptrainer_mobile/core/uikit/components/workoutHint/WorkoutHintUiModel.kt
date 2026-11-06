@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.features.workout.presentation
+package com.example.pushuptrainer_mobile.core.uikit.components.workoutHint
 
 import androidx.compose.runtime.Immutable
 

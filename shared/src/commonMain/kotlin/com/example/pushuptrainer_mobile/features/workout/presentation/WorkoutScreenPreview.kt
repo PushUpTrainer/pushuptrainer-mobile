@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.pushuptrainer_mobile.core.uikit.components.workoutHint.WorkoutHintUiModel
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
 import org.jetbrains.compose.resources.painterResource
 import pushuptrainermobile.shared.generated.resources.Res
@@ -31,13 +32,18 @@ fun WorkoutGoalLightPreview() = WorkoutPreview(darkTheme = false, withGoal = tru
 @Composable
 fun WorkoutCompactPreview() = WorkoutPreview(darkTheme = true, withGoal = true)
 
+@Preview(widthDp = 360, heightDp = 800)
 @Composable
-private fun WorkoutPreview(darkTheme: Boolean, withGoal: Boolean) {
+fun WorkoutNoHintPreview() = WorkoutPreview(darkTheme = true, withGoal = false, showHint = false)
+
+@Composable
+private fun WorkoutPreview(darkTheme: Boolean, withGoal: Boolean, showHint: Boolean = true) {
     PushUpTrainerTheme(darkTheme = darkTheme) {
         WorkoutScreen(
             state = WorkoutUiState(
-                counter = if (withGoal) WorkoutCounterUiModel.Goal("16", "20") else WorkoutCounterUiModel.Free("16"),
-                hint = WorkoutHintUiModel("Тело в кадре", "Подсказки по технике"),
+                repetitions = "16",
+                mode = if (withGoal) WorkoutModeUiModel.Goal("20") else WorkoutModeUiModel.Free,
+                hint = if (showHint) WorkoutHintUiModel("Тело в кадре", "Подсказки по технике") else null,
             ),
             onEvent = {},
         ) {

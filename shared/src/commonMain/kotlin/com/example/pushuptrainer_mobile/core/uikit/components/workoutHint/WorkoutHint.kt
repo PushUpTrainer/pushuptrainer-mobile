@@ -1,4 +1,4 @@
-package com.example.pushuptrainer_mobile.features.workout.presentation.components
+package com.example.pushuptrainer_mobile.core.uikit.components.workoutHint
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
-import com.example.pushuptrainer_mobile.features.workout.presentation.WorkoutHintUiModel
 
 @Composable
 fun WorkoutHint(model: WorkoutHintUiModel, modifier: Modifier = Modifier) {

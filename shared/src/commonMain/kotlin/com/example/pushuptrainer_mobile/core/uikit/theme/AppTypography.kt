@@ -7,16 +7,28 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+/**
+ * Текстовые стили по макету Figma (шрифт в макете — Roboto).
+ */
 @Immutable
 data class AppTypography(
+    /** Заголовок экрана, SemiBold 28/34. */
     val screenTitle: TextStyle,
+    /** Крупное число (например, количество повторений), SemiBold 48/56. */
     val display: TextStyle,
+    /** Заголовок карточки, SemiBold 17/22. */
     val cardTitleLarge: TextStyle,
+    /** Заголовок карточки, SemiBold 16/22. */
     val cardTitle: TextStyle,
+    /** Текст кнопки, Medium 16/20. */
     val button: TextStyle,
+    /** Акцентная подпись, Medium 14/20. */
     val labelMedium: TextStyle,
+    /** Обычный текст, Regular 14/20. */
     val body: TextStyle,
+    /** Мелкая подпись, Regular 12/17. */
     val caption: TextStyle,
+    /** Подпись в нижней навигации, Medium 11/16. */
     val navLabel: TextStyle,
 )
 

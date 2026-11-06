@@ -3,7 +3,7 @@ package com.example.pushuptrainer_mobile.core.uikit.components.primaryButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
 
+/** Основная кнопка: залитая акцентным цветом. */
 @Composable
 fun AppPrimaryButton(
     text: String,
@@ -27,12 +28,12 @@ fun AppPrimaryButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 52.dp),
+            .height(52.dp),
         shape = RoundedCornerShape(14.dp),
         color = AppTheme.colors.accent,
     ) {
         Box(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -40,6 +41,7 @@ fun AppPrimaryButton(
                 style = AppTheme.typography.button,
                 color = AppTheme.colors.onAccent,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
             )
         }
     }
