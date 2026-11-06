@@ -28,4 +28,30 @@
     <!-- После «из» форма для 2–4 такая же, как для 5+: «из 3 повторений» -->
     <string name="training_result_of_goal_repetitions_one">из %1$d повторения</string>
     <string name="training_result_of_goal_repetitions_many">из %1$d повторений</string>
+
+    <!-- Главный экран -->
+    <string name="main_title">Тренировка</string>
+    <string name="main_subtitle">Повторения и техника — под контролем</string>
+    <string name="main_week_title">Твоя неделя</string>
+    <string-array name="main_weekdays_short">
+        <item>ПН</item>
+        <item>ВТ</item>
+        <item>СР</item>
+        <item>ЧТ</item>
+        <item>ПТ</item>
+        <item>СБ</item>
+        <item>ВС</item>
+    </string-array>
+    <string name="main_how_it_works_title">Как работает приложение</string>
+    <string name="main_how_it_works_subtitle">Четыре коротких шага</string>
+    <string name="main_today_label">Сегодня</string>
+    <string name="main_today_empty_title">Тренировок пока нет</string>
+    <string name="main_today_empty_hint">Начните с кнопки «Подготовиться»</string>
+    <string name="main_today_repetitions_one">повторение</string>
+    <string name="main_today_repetitions_few">повторения</string>
+    <string name="main_today_repetitions_many">повторений</string>
+    <string name="main_today_trainings_one">%1$d тренировка</string>
+    <string name="main_today_trainings_few">%1$d тренировки</string>
+    <string name="main_today_trainings_many">%1$d тренировок</string>
+    <string name="main_prepare">Подготовиться</string>
 </resources>
