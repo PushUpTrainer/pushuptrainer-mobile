@@ -41,6 +41,16 @@
     <string name="preparation_no_goal_description">Повторения считаются без лимита. Завершите тренировку вручную.</string>
     <string name="preparation_how_to_place_title">Как поставить телефон</string>
     <string name="preparation_how_to_place_subtitle">Положение камеры и тела</string>
-    <string name="preparation_pose_placeholder">Иллюстрация позы\n(добавить ресурс из Figma)</string>
+    <!-- Иллюстрация позы -->
+    <string name="preparation_pose_content_description">Правильная поза для отжимания</string>
+
+    <!-- Подсказка «Как поставить телефон» -->
+    <string name="preparation_hint_title">Как поставить телефон</string>
+    <string name="preparation_hint_step1_title">Установите телефон устойчиво.</string>
+    <string name="preparation_hint_step1_note">Направьте камеру на тело.</string>
+    <string name="preparation_hint_step2_title">Отодвиньтесь так, чтобы в кадре были видны голова, руки и торс.</string>
+    <string name="preparation_hint_step3_title">Выберите хорошо освещённое место.</string>
+    <string name="preparation_hint_step3_note">Не закрывайте камеру.</string>
+    <string name="preparation_hint_confirm">Понятно</string>
     <string name="preparation_start">Начать тренировку</string>
 </resources>
