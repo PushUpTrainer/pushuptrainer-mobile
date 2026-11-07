@@ -19,4 +19,6 @@ internal object PreparationPreviewData {
     val goalAtMinimum = withGoal.copy(
         goal = GoalSelectorUiModel(goal = 1, canDecrease = false, canIncrease = true),
     )
+
+    val hintVisible = withGoal.copy(isHowToPlacePhoneVisible = true)
 }

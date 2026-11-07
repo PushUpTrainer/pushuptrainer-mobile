@@ -16,7 +16,7 @@ private const val DEFAULT_GOAL = 20
 /**
  * ViewModel экрана подготовки.
  *
- * Хранит выбранный режим и цель тренировки — это состояние самого экрана.
+ * Хранит выбранный режим, цель тренировки и видимость подсказки «Как поставить телефон».
  * Запуск тренировки, навигация и переключение темы подключаются отдельными задачами.
  */
 class PreparationViewModel : ViewModel() {
@@ -29,7 +29,8 @@ class PreparationViewModel : ViewModel() {
             is PreparationUiEvent.ModeSelected -> selectMode(event.mode)
             PreparationUiEvent.GoalDecreaseClicked -> changeGoal(-GOAL_STEP)
             PreparationUiEvent.GoalIncreaseClicked -> changeGoal(GOAL_STEP)
-            PreparationUiEvent.HowToPlacePhoneClicked -> Unit
+            PreparationUiEvent.HowToPlacePhoneClicked -> setHintVisible(true)
+            PreparationUiEvent.HowToPlacePhoneDismissed -> setHintVisible(false)
             PreparationUiEvent.StartTrainingClicked -> Unit
             PreparationUiEvent.ThemeToggleClicked -> Unit
             is PreparationUiEvent.BottomBarDestinationClicked -> Unit
@@ -46,6 +47,10 @@ class PreparationViewModel : ViewModel() {
             state.copy(goal = goalModel(newGoal))
         }
     }
+
+    private fun setHintVisible(isVisible: Boolean) {
+        _state.update { it.copy(isHowToPlacePhoneVisible = isVisible) }
+    }
 }
 
 /** Модель счётчика с уже посчитанной доступностью кнопок «−» / «+». */
@@ -58,4 +63,5 @@ private fun goalModel(goal: Int): GoalSelectorUiModel = GoalSelectorUiModel(
 private fun initialPreparationState(): PreparationUiState = PreparationUiState(
     selectedMode = PreparationMode.WithGoal,
     goal = goalModel(DEFAULT_GOAL),
+    isHowToPlacePhoneVisible = false,
 )

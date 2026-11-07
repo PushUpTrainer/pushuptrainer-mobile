@@ -7,4 +7,5 @@ import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwi
 data class PreparationUiState(
     val selectedMode: PreparationMode,
     val goal: GoalSelectorUiModel,
+    val isHowToPlacePhoneVisible: Boolean = false,
 )

@@ -15,8 +15,11 @@ sealed interface PreparationUiEvent {
     /** Нажата кнопка «+» у счётчика цели. */
     data object GoalIncreaseClicked : PreparationUiEvent
 
-    /** Нажата строка «Как поставить телефон». */
+    /** Нажата строка «Как поставить телефон» — открыть подсказку. */
     data object HowToPlacePhoneClicked : PreparationUiEvent
+
+    /** Нажата кнопка «Понятно» в подсказке — закрыть её. */
+    data object HowToPlacePhoneDismissed : PreparationUiEvent
 
     /** Нажата кнопка «Начать тренировку». */
     data object StartTrainingClicked : PreparationUiEvent
