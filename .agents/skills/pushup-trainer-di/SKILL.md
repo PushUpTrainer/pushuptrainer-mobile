@@ -906,3 +906,9 @@ and:
 > “Is this registration owned by the correct architectural area, and is it reached through the correct `includes(...)` hierarchy?”
 
 The task is complete only when both answers are yes.
+
+## Local storage ownership
+
+Keep `data/local/database` (with `dao`, `entity`, and `di`), `data/local/datasource`, and `data/local/di` separate. Database DI owns database and DAO registrations. Data source DI owns `WorkoutLocalDataSource` and its implementation. Local DI only includes those submodules.
+
+Inject `WorkoutSessionDao` into the data source implementation through its constructor. Repositories depend on `WorkoutLocalDataSource` for saving, reading, observing, and deleting workouts. Do not expose DAO as the repository boundary. Check the real application DI graph with an in-memory database and exercise the data source after changing this structure.
