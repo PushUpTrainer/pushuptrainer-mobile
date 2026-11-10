@@ -9,9 +9,12 @@ sealed interface TrainingResultUiState {
     /** Итог тренировки ещё подготавливается. */
     data object Loading : TrainingResultUiState
 
+    data object Unavailable : TrainingResultUiState
+
     /** Итог тренировки готов к отображению. */
     data class Content(
         val summary: TrainingResultSummaryUiModel,
-        val streak: StreakCardUiModel,
+        val streak: StreakCardUiModel? = null,
+        val canStartNew: Boolean = true,
     ) : TrainingResultUiState
 }

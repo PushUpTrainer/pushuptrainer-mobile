@@ -20,6 +20,7 @@ fun BottomNavigationBar(
     selected: BottomNavigationDestination,
     onDestinationClick: (BottomNavigationDestination) -> Unit,
     modifier: Modifier = Modifier,
+    enabledDestinations: Set<BottomNavigationDestination> = BottomNavigationDestination.entries.toSet(),
 ) {
     Column(
         modifier = modifier
@@ -32,6 +33,7 @@ fun BottomNavigationBar(
                 BottomNavigationItem(
                     destination = destination,
                     isSelected = destination == selected,
+                    enabled = destination in enabledDestinations,
                     onClick = { onDestinationClick(destination) },
                     modifier = Modifier.weight(1f),
                 )

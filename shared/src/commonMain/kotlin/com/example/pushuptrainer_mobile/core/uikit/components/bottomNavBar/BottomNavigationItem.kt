@@ -1,6 +1,6 @@
 package com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -33,14 +33,19 @@ import pushuptrainermobile.shared.generated.resources.ic_nav_trainer
 internal fun BottomNavigationItem(
     destination: BottomNavigationDestination,
     isSelected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val color = if (isSelected) AppTheme.colors.accent else AppTheme.colors.textSecondary
+    val color = when {
+        !enabled -> AppTheme.colors.textSecondary.copy(alpha = 0.55f)
+        isSelected -> AppTheme.colors.accent
+        else -> AppTheme.colors.textSecondary
+    }
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .clickable(role = Role.Tab, onClick = onClick)
+            .selectable(selected = isSelected, enabled = enabled, role = Role.Tab, onClick = onClick)
             .padding(top = 11.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

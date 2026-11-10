@@ -23,14 +23,16 @@ fun AppPrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Surface(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(14.dp),
-        color = AppTheme.colors.accent,
+        color = AppTheme.colors.accent.copy(alpha = if (enabled) 1f else 0.45f),
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 16.dp),

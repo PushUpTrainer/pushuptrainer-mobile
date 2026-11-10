@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,8 +28,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationBar
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import com.example.pushuptrainer_mobile.LocalToggleTheme
+import com.example.pushuptrainer_mobile.core.navigation.Destination
+import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import com.example.pushuptrainer_mobile.core.uikit.components.primaryButton.AppPrimaryButton
 import com.example.pushuptrainer_mobile.core.uikit.components.secondaryButton.AppSecondaryButton
 import com.example.pushuptrainer_mobile.core.uikit.components.streakCard.StreakCard
@@ -49,22 +51,24 @@ import pushuptrainermobile.shared.generated.resources.training_result_subtitle_g
 import pushuptrainermobile.shared.generated.resources.training_result_subtitle_no_goal
 import pushuptrainermobile.shared.generated.resources.training_result_subtitle_stopped_early
 import pushuptrainermobile.shared.generated.resources.training_result_title
+import pushuptrainermobile.shared.generated.resources.training_result_unavailable
 
 /** Анимация появления результата из макета: задержка 140 мс, 360 мс, ease-out. */
 private const val AppearanceDelayMillis = 140L
 private const val AppearanceDurationMillis = 360
 
-/** Точка входа экрана для продакшена: берёт состояние из ViewModel. */
 @Composable
-fun TrainingResultRoute(
-    viewModel: TrainingResultViewModel,
-    modifier: Modifier = Modifier,
+internal fun TrainingResultRoot(
+    entry: NavigationEntry,
+    workoutId: String,
+    preparation: Destination?,
+    viewModel: TrainingResultViewModel = koinViewModel(parameters = { parametersOf(entry, workoutId, preparation) }),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     TrainingResultScreen(
         state = state,
-        onEvent = viewModel::onEvent,
-        modifier = modifier,
+        onEvent = { viewModel.onEvent(it) },
+        onThemeToggle = LocalToggleTheme.current,
     )
 }
 
@@ -80,30 +84,41 @@ fun TrainingResultScreen(
     onEvent: (TrainingResultUiEvent) -> Unit,
     modifier: Modifier = Modifier,
     playAppearanceAnimation: Boolean = true,
+    onThemeToggle: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(AppTheme.colors.background)
-            .safeDrawingPadding(),
+            .background(AppTheme.colors.background),
     ) {
         when (state) {
             TrainingResultUiState.Loading -> TrainingResultLoading(
-                onEvent = onEvent,
+                onThemeToggle = onThemeToggle,
                 modifier = Modifier.weight(1f),
             )
+
+            TrainingResultUiState.Unavailable -> Column(Modifier.padding(horizontal = 20.dp)) {
+                TrainingResultHeader(subtitle = null, onThemeToggleClick = onThemeToggle)
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    text = stringResource(Res.string.training_result_unavailable),
+                    color = AppTheme.colors.textPrimary,
+                )
+                Spacer(Modifier.height(20.dp))
+                AppSecondaryButton(
+                    text = stringResource(Res.string.training_result_go_to_main),
+                    onClick = { onEvent(TrainingResultUiEvent.GoToMainClicked) },
+                )
+            }
 
             is TrainingResultUiState.Content -> TrainingResultContent(
                 state = state,
                 onEvent = onEvent,
                 playAppearanceAnimation = playAppearanceAnimation,
+                onThemeToggle = onThemeToggle,
                 modifier = Modifier.weight(1f),
             )
         }
-        BottomNavigationBar(
-            selected = BottomNavigationDestination.Trainer,
-            onDestinationClick = { onEvent(TrainingResultUiEvent.BottomBarDestinationClicked(it)) },
-        )
     }
 }
 
@@ -112,6 +127,7 @@ private fun TrainingResultContent(
     state: TrainingResultUiState.Content,
     onEvent: (TrainingResultUiEvent) -> Unit,
     playAppearanceAnimation: Boolean,
+    onThemeToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Состояние анимации чисто визуальное, поэтому живёт в Compose, а не в UiState.
@@ -135,7 +151,7 @@ private fun TrainingResultContent(
     ) {
         TrainingResultHeader(
             subtitle = stringResource(state.summary.outcome.subtitleText()),
-            onThemeToggleClick = { onEvent(TrainingResultUiEvent.ThemeToggleClicked) },
+            onThemeToggleClick = onThemeToggle,
         )
         Spacer(Modifier.height(20.dp))
         TrainingResultSummaryCard(
@@ -146,14 +162,14 @@ private fun TrainingResultContent(
         TrainingSavedCard(
             modifier = Modifier.graphicsLayer { alpha = appearance },
         )
-        Spacer(Modifier.height(16.dp))
-        StreakCard(
-            model = state.streak,
-            isHighlighted = isRevealed,
-        )
+        state.streak?.let { streak ->
+            Spacer(Modifier.height(16.dp))
+            StreakCard(model = streak, isHighlighted = isRevealed)
+        }
         Spacer(Modifier.height(40.dp))
         AppPrimaryButton(
             text = stringResource(Res.string.training_result_start_new),
+            enabled = state.canStartNew,
             onClick = { onEvent(TrainingResultUiEvent.StartNewTrainingClicked) },
         )
         Spacer(Modifier.height(16.dp))
@@ -167,7 +183,7 @@ private fun TrainingResultContent(
 
 @Composable
 private fun TrainingResultLoading(
-    onEvent: (TrainingResultUiEvent) -> Unit,
+    onThemeToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -177,7 +193,7 @@ private fun TrainingResultLoading(
     ) {
         TrainingResultHeader(
             subtitle = null,
-            onThemeToggleClick = { onEvent(TrainingResultUiEvent.ThemeToggleClicked) },
+            onThemeToggleClick = onThemeToggle,
         )
         Box(
             modifier = Modifier
