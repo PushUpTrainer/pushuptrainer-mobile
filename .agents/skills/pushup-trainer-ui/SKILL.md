@@ -170,32 +170,13 @@ An `enum` is acceptable when the variants do not need their own data. Choose the
 
 The screen, its `UiState`, `UiEvent`, ViewModel, and elements that are genuinely specific to that screen belong to the corresponding feature package/area.
 
-Reusable visual components must live in the existing project **UI kit**, not inside a feature package.
+All standalone visual components live in `core/uikit/components`, each in its own package. Keep each component's UI models in the same package beside the component. Do not create a feature-level `components` package. Screen state, events, mode, and ViewModel remain in the feature presentation package.
 
-Example logical structure (package names and directories are illustrative; follow the repository's actual structure):
+Before changing shared UI, fetch and integrate the current `main`. Inspect the accepted UI kit and reuse its components, resources, and theme. Resolve overlapping UI kit changes in favor of the accepted `main` version unless the task explicitly requires changing that component. Check the final diff against current `main` to ensure teammate screens and shared components have not been overwritten.
 
-```text
-shared/src/commonMain/kotlin/
-├── presentation/
-│   └── auth/
-│       ├── AuthScreen.kt
-│       ├── AuthUiState.kt
-│       ├── AuthUiEvent.kt
-│       └── AuthViewModel.kt
-└── ui-kit/
-    └── components/
-        ├── AppTextField.kt
-        ├── PrimaryButton.kt
-        └── ...
-```
+Workout mode and hint visibility must be controlled by screen `UiState`. Use typed modes for mode-specific data, and a nullable hint when no hint should be displayed. Do not derive these decisions from hidden local state.
 
-Shared screens, screen state/events, UI models, and reusable Compose components belong in `commonMain` by default. Place only genuinely platform-specific implementations in `androidMain` or `iosMain`. Do not introduce new modules or restructure existing packages without an explicit task requirement.
-
-Do not copy the same shared component into multiple features.
-
-At the same time, do not move a component into the UI kit merely because it was extracted into a separate function. If it only makes sense inside one specific screen and is not a shared UI element, it may remain inside the feature.
-
-Follow the actual project structure while preserving this separation of responsibilities.
+Shared UI belongs in `commonMain` by default. Place only genuinely platform-specific implementations in platform source sets. Do not introduce new modules or restructure unrelated packages.
 
 ## 6. Decompose by meaningful UI blocks
 
@@ -463,7 +444,9 @@ Before finishing, verify all of the following:
 - standalone composite components receive a UI model instead of a list of related parameters;
 - component variants are not modeled with meaningless combinations of Boolean flags;
 - invalid state combinations are made impossible through types where practical;
-- reusable components live in the UI kit rather than being dumped into a feature package;
+- standalone components and their UI models live together in their own UI kit packages;
+- the branch includes current main and the final diff preserves accepted teammate UI kit and screens;
+- screen mode and hint visibility are represented in UiState;
 - the feature contains the screen and genuinely feature-specific UI only;
 - complex UI is decomposed by meaning without micro-fragmentation;
 - business logic is absent from Composable functions;
