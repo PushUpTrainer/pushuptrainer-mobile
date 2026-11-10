@@ -1,6 +1,7 @@
-package com.example.pushuptrainer_mobile.features.home.domain
+package com.example.pushuptrainer_mobile.features.home.domain.usecase
 
-import com.example.pushuptrainer_mobile.domain.workout.WorkoutHistoryRepository
+import com.example.pushuptrainer_mobile.features.home.domain.model.HomeHistory
+import com.example.pushuptrainer_mobile.features.home.domain.repository.HomeRepository
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.map
@@ -9,16 +10,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.toLocalDateTime
 
-internal data class HomeHistory(
-    val week: List<LocalDate>,
-    val today: LocalDate,
-    val workoutDays: Set<LocalDate>,
-    val repetitionsToday: Int,
-    val workoutsToday: Int,
-)
-
-internal class ObserveHomeHistory(private val repository: WorkoutHistoryRepository) {
-    operator fun invoke() = repository.observe().map { workouts ->
+internal class ObserveHomeHistoryUseCase(private val repository: HomeRepository) {
+    operator fun invoke() = repository.observeWorkouts().map { workouts ->
         val zone = TimeZone.currentSystemDefault()
         val today = Clock.System.now().toLocalDateTime(zone).date
         val monday = today.toEpochDays() - (today.dayOfWeek.isoDayNumber - 1)

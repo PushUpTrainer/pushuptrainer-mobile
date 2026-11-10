@@ -8,7 +8,7 @@ import com.example.pushuptrainer_mobile.core.navigation.Router
 import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingOutcomeUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingResultSummaryUiModel
 import com.example.pushuptrainer_mobile.features.home.navigateToHomeScreen
-import com.example.pushuptrainer_mobile.features.trainingresult.domain.GetTrainingResult
+import com.example.pushuptrainer_mobile.features.trainingresult.domain.usecase.GetTrainingResultUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +19,7 @@ internal class TrainingResultViewModel(
     workoutId: String,
     private val preparation: Destination?,
     private val router: Router,
-    getTrainingResult: GetTrainingResult,
+    getTrainingResult: GetTrainingResultUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow<TrainingResultUiState>(TrainingResultUiState.Loading)
     val state = _state.asStateFlow()

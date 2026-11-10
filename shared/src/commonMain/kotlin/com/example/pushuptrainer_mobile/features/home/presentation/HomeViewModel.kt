@@ -8,8 +8,8 @@ import com.example.pushuptrainer_mobile.core.navigation.Router
 import com.example.pushuptrainer_mobile.core.uikit.components.todaySummaryCard.TodaySummaryUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard.WeekCalendarUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard.WeekDayUiModel
-import com.example.pushuptrainer_mobile.features.home.domain.HomeHistory
-import com.example.pushuptrainer_mobile.features.home.domain.ObserveHomeHistory
+import com.example.pushuptrainer_mobile.features.home.domain.model.HomeHistory
+import com.example.pushuptrainer_mobile.features.home.domain.usecase.ObserveHomeHistoryUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -20,7 +20,7 @@ internal class HomeViewModel(
     private val entry: NavigationEntry,
     private val preparation: Destination?,
     private val router: Router,
-    observeHomeHistory: ObserveHomeHistory,
+    observeHomeHistory: ObserveHomeHistoryUseCase,
 ) : ViewModel() {
     private val canPrepare = preparation != null
     val state = observeHomeHistory()
