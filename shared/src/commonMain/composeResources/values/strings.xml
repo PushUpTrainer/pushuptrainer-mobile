@@ -54,4 +54,15 @@
     <string name="main_today_trainings_few">%1$d тренировки</string>
     <string name="main_today_trainings_many">%1$d тренировок</string>
     <string name="main_prepare">Подготовиться</string>
+
+    <!-- Экран «О проекте» -->
+    <string name="about_title">О проекте</string>
+    <string name="about_subtitle">Учебный проект команды ИТМО.\nСчётчик отжиманий и подсказки по технике.</string>
+    <string name="about_team_mobile">Мобильная разработка</string>
+    <string name="about_team_ml">Машинное обучение</string>
+    <string name="about_team_design">UI-дизайн</string>
+    <string name="about_role_android">Android-разработка</string>
+    <string name="about_role_ios">iOS-разработка</string>
+    <string name="about_role_ml">ML-разработка</string>
+    <string name="about_role_algorithms">Разработка алгоритмов</string>
 </resources>
