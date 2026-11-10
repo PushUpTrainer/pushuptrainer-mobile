@@ -1,27 +1,26 @@
 package com.example.pushuptrainer_mobile.features.main.presentation
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+import com.example.pushuptrainer_mobile.core.navigation.Router
+import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import com.example.pushuptrainer_mobile.features.home.HomeRoute
+import com.example.pushuptrainer_mobile.features.home.navigateToHomeScreen
+import com.example.pushuptrainer_mobile.features.trainingresult.TrainingResultRoute
 
-/**
- * ViewModel главного экрана.
- *
- * Пока это каркас: загрузка данных, навигация и переключение темы
- * подключаются отдельными задачами.
- */
-class MainViewModel : ViewModel() {
+internal class MainViewModel(private val router: Router) : ViewModel() {
+    fun state(entry: NavigationEntry) = MainUiState(
+        selected = when (entry.destination) {
+            HomeRoute, is TrainingResultRoute -> BottomNavigationDestination.Trainer
+            else -> error("Unknown Main destination: ${entry.destination}")
+        },
+        available = setOf(BottomNavigationDestination.Trainer),
+    )
 
-    private val _state = MutableStateFlow<MainUiState>(MainUiState.Loading)
-    val state: StateFlow<MainUiState> = _state.asStateFlow()
-
-    fun onEvent(event: MainUiEvent) {
-        when (event) {
-            MainUiEvent.PrepareClicked -> Unit
-            MainUiEvent.HowItWorksClicked -> Unit
-            MainUiEvent.ThemeToggleClicked -> Unit
-            is MainUiEvent.BottomBarDestinationClicked -> Unit
+    fun onEvent(entry: NavigationEntry, event: MainUiEvent): Boolean = when (event) {
+        is MainUiEvent.TabSelected -> when (event.destination) {
+            BottomNavigationDestination.Trainer -> router.navigateToHomeScreen(entry)
+            BottomNavigationDestination.Progress, BottomNavigationDestination.About -> false
         }
     }
 }

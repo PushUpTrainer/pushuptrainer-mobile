@@ -81,4 +81,6 @@
     <string name="main_today_trainings_few">%1$d тренировки</string>
     <string name="main_today_trainings_many">%1$d тренировок</string>
     <string name="main_prepare">Подготовиться</string>
+    <string name="training_result_unavailable">Результат тренировки недоступен</string>
+    <string name="main_history_unavailable">История тренировок недоступна</string>
 </resources>
