@@ -43,9 +43,7 @@ class AboutViewModel : ViewModel() {
 
     fun onEvent(event: AboutUiEvent) {
         when (event) {
-            AboutUiEvent.ThemeToggleClicked -> Unit
             AboutUiEvent.RepositoryLinkClicked -> Unit
-            is AboutUiEvent.BottomBarDestinationClicked -> Unit
         }
     }
 

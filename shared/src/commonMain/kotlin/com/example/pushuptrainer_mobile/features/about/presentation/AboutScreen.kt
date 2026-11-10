@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,8 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationBar
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import com.example.pushuptrainer_mobile.LocalToggleTheme
 import com.example.pushuptrainer_mobile.core.uikit.components.repositoryLink.RepositoryLink
 import com.example.pushuptrainer_mobile.core.uikit.components.screenHeader.ScreenHeader
 import com.example.pushuptrainer_mobile.core.uikit.components.screenHeader.ScreenHeaderUiModel
@@ -35,7 +33,7 @@ import pushuptrainermobile.shared.generated.resources.about_title
 
 /** Точка входа экрана для продакшена: берёт состояние из ViewModel. */
 @Composable
-fun AboutRoute(
+internal fun AboutRoute(
     viewModel: AboutViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -44,6 +42,7 @@ fun AboutRoute(
         state = state,
         onEvent = viewModel::onEvent,
         modifier = modifier,
+        onThemeToggle = LocalToggleTheme.current,
     )
 }
 
@@ -53,29 +52,26 @@ fun AboutScreen(
     state: AboutUiState,
     onEvent: (AboutUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onThemeToggle: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(AppTheme.colors.background)
-            .safeDrawingPadding(),
+            .background(AppTheme.colors.background),
     ) {
         when (state) {
             AboutUiState.Loading -> AboutLoading(
-                onEvent = onEvent,
+                onThemeToggle = onThemeToggle,
                 modifier = Modifier.weight(1f),
             )
 
             is AboutUiState.Content -> AboutContent(
                 state = state,
                 onEvent = onEvent,
+                onThemeToggle = onThemeToggle,
                 modifier = Modifier.weight(1f),
             )
         }
-        BottomNavigationBar(
-            selected = BottomNavigationDestination.About,
-            onDestinationClick = { onEvent(AboutUiEvent.BottomBarDestinationClicked(it)) },
-        )
     }
 }
 
@@ -83,6 +79,7 @@ fun AboutScreen(
 private fun AboutContent(
     state: AboutUiState.Content,
     onEvent: (AboutUiEvent) -> Unit,
+    onThemeToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -91,7 +88,7 @@ private fun AboutContent(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {
-        AboutHeader(onEvent = onEvent)
+        AboutHeader(onThemeToggle = onThemeToggle)
         Spacer(Modifier.height(16.dp))
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             state.teams.forEach { team ->
@@ -108,7 +105,7 @@ private fun AboutContent(
 
 @Composable
 private fun AboutLoading(
-    onEvent: (AboutUiEvent) -> Unit,
+    onThemeToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -116,7 +113,7 @@ private fun AboutLoading(
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
     ) {
-        AboutHeader(onEvent = onEvent)
+        AboutHeader(onThemeToggle = onThemeToggle)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -129,13 +126,13 @@ private fun AboutLoading(
 }
 
 @Composable
-private fun AboutHeader(onEvent: (AboutUiEvent) -> Unit) {
+private fun AboutHeader(onThemeToggle: () -> Unit) {
     ScreenHeader(
         model = ScreenHeaderUiModel(
             title = stringResource(Res.string.about_title),
             subtitle = stringResource(Res.string.about_subtitle),
         ),
-        onThemeToggleClick = { onEvent(AboutUiEvent.ThemeToggleClicked) },
+        onThemeToggleClick = onThemeToggle,
     )
 }
 
