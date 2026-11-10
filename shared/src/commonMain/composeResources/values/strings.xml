@@ -54,4 +54,39 @@
     <string name="main_today_trainings_few">%1$d тренировки</string>
     <string name="main_today_trainings_many">%1$d тренировок</string>
     <string name="main_prepare">Подготовиться</string>
+
+    <!-- UI kit: календарь и статистика -->
+    <string name="close">Закрыть</string>
+    <string name="month_calendar_previous">Предыдущий месяц</string>
+    <string name="month_calendar_next">Следующий месяц</string>
+    <string name="day_summary_trainings_one">тренировка</string>
+    <string name="day_summary_trainings_few">тренировки</string>
+    <string name="day_summary_trainings_many">тренировок</string>
+
+    <!-- Онбординг -->
+    <string name="onboarding_title">Знакомство</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_back">Назад</string>
+    <string name="onboarding_finish">Понятно</string>
+    <string name="onboarding_modes_title">Выберите свой темп</string>
+    <string name="onboarding_modes_with_goal_title">С целью</string>
+    <string name="onboarding_modes_with_goal_text">Автоматическое завершение после\nзаданного числа повторений.</string>
+    <string name="onboarding_modes_without_goal_title">∞ Без цели</string>
+    <string name="onboarding_modes_without_goal_text">Повторения без лимита.\nЗавершите тренировку вручную.</string>
+    <string name="onboarding_camera_title">Поставьте телефон\nперед собой</string>
+    <string name="onboarding_camera_text">Установите телефон устойчиво перед собой. Направьте камеру на тело: голова, руки и торс должны быть в кадре.</string>
+    <string name="onboarding_camera_caption">Счётчик повторений и подсказки\nво время тренировки</string>
+    <string name="onboarding_progress_title">Следите за прогрессом</string>
+    <string name="onboarding_progress_text">В разделе «Прогресс» нажмите на день в календаре, чтобы посмотреть тренировки и повторения за этот день.\n\nНиже находятся общая статистика и рекорды.</string>
+    <string name="onboarding_progress_month">Октябрь 2026</string>
+    <string name="onboarding_progress_day">19 октября · Сегодня</string>
+    <string name="onboarding_appearance_title">Выберите оформление</string>
+    <string name="onboarding_appearance_text">Нажмите «Тема» в правом верхнем углу главного экрана, чтобы переключить светлое и тёмное оформление.</string>
+    <string name="onboarding_appearance_screen_title">Тренировка</string>
+    <string name="onboarding_appearance_screen_subtitle">Повторения и техника – под контролем</string>
+    <string name="onboarding_appearance_dark">Тёмная</string>
+    <string name="onboarding_appearance_light">Светлая</string>
+    <string name="onboarding_appearance_hint">Смена Темы – вверху справа</string>
+    <string name="onboarding_stat_total_repetitions">Всего повторений</string>
+    <string name="onboarding_stat_record">Рекорд</string>
 </resources>
