@@ -6,12 +6,13 @@ import com.example.pushuptrainer_mobile.core.navigation.Router
 import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
 import com.example.pushuptrainer_mobile.features.home.HomeRoute
 import com.example.pushuptrainer_mobile.features.home.navigateToHomeScreen
+import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
 import com.example.pushuptrainer_mobile.features.trainingresult.TrainingResultRoute
 
 internal class MainViewModel(private val router: Router) : ViewModel() {
     fun state(entry: NavigationEntry) = MainUiState(
         selected = when (entry.destination) {
-            HomeRoute, is TrainingResultRoute -> BottomNavigationDestination.Trainer
+            HomeRoute, PreparationRoute, is TrainingResultRoute -> BottomNavigationDestination.Trainer
             else -> error("Unknown Main destination: ${entry.destination}")
         },
         available = setOf(BottomNavigationDestination.Trainer),

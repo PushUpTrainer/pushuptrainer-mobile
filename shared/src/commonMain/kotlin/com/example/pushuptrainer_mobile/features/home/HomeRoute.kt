@@ -6,6 +6,7 @@ import com.example.pushuptrainer_mobile.core.navigation.LocalNavigationEntry
 import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
 import com.example.pushuptrainer_mobile.core.navigation.Router
 import com.example.pushuptrainer_mobile.features.home.presentation.HomeRoot
+import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,5 +16,5 @@ fun Router.navigateToHomeScreen(from: NavigationEntry): Boolean =
     returnTo(from, HomeRoute)
 
 internal fun EntryProviderScope<Destination>.homeSection() {
-    entry<HomeRoute> { HomeRoot(LocalNavigationEntry.current) }
+    entry<HomeRoute> { HomeRoot(LocalNavigationEntry.current, PreparationRoute) }
 }

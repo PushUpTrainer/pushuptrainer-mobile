@@ -10,6 +10,7 @@ import com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard.W
 import com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard.WeekDayUiModel
 import com.example.pushuptrainer_mobile.features.home.domain.HomeHistory
 import com.example.pushuptrainer_mobile.features.home.domain.ObserveHomeHistory
+import com.example.pushuptrainer_mobile.features.preparation.navigateToPreparationScreen
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -48,7 +49,7 @@ internal class HomeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading(canPrepare))
 
     fun onEvent(event: HomeUiEvent): Boolean = when (event) {
-        HomeUiEvent.PrepareClicked -> preparation?.let { router.open(entry, it) } ?: false
+        HomeUiEvent.PrepareClicked -> preparation?.let { router.navigateToPreparationScreen(entry) } ?: false
     }
 }
 

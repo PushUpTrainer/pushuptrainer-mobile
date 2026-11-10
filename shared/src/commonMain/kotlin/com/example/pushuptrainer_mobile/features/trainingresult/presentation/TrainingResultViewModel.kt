@@ -9,6 +9,7 @@ import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSumm
 import com.example.pushuptrainer_mobile.core.uikit.components.trainingResultSummaryCard.TrainingResultSummaryUiModel
 import com.example.pushuptrainer_mobile.features.home.navigateToHomeScreen
 import com.example.pushuptrainer_mobile.features.trainingresult.domain.GetTrainingResult
+import com.example.pushuptrainer_mobile.features.preparation.navigateToPreparationScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,7 +51,7 @@ internal class TrainingResultViewModel(
     }
 
     fun onEvent(event: TrainingResultUiEvent): Boolean = when (event) {
-        TrainingResultUiEvent.StartNewTrainingClicked -> preparation?.let { router.replace(entry, it) } ?: false
+        TrainingResultUiEvent.StartNewTrainingClicked -> preparation?.let { router.navigateToPreparationScreen(entry, replaceCurrent = true) } ?: false
         TrainingResultUiEvent.GoToMainClicked -> router.navigateToHomeScreen(entry)
     }
 }
