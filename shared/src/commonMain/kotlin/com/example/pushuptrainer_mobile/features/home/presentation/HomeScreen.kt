@@ -105,7 +105,7 @@ private fun HomeContent(state: HomeUiState.Content, modifier: Modifier = Modifie
         }
         WeekCalendarCard(model = state.week)
         Spacer(Modifier.height(16.dp))
-        TodaySummaryCard(model = state.today)
+        TodaySummaryCard(model = state.today, showPreparationHint = state.canPrepare)
         Spacer(Modifier.height(16.dp))
     }
 }

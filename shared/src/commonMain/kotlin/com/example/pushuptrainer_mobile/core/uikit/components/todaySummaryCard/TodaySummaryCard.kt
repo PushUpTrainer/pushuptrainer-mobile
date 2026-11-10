@@ -43,6 +43,7 @@ import pushuptrainermobile.shared.generated.resources.main_today_trainings_one
 fun TodaySummaryCard(
     model: TodaySummaryUiModel,
     modifier: Modifier = Modifier,
+    showPreparationHint: Boolean = true,
 ) {
     val cardModifier = modifier
         .fillMaxWidth()
@@ -52,13 +53,13 @@ fun TodaySummaryCard(
         .padding(16.dp)
 
     when (model) {
-        TodaySummaryUiModel.Empty -> TodayEmptyContent(modifier = cardModifier)
+        TodaySummaryUiModel.Empty -> TodayEmptyContent(showPreparationHint = showPreparationHint, modifier = cardModifier)
         is TodaySummaryUiModel.Done -> TodayDoneContent(model = model, modifier = cardModifier)
     }
 }
 
 @Composable
-private fun TodayEmptyContent(modifier: Modifier = Modifier) {
+private fun TodayEmptyContent(showPreparationHint: Boolean, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
@@ -76,12 +77,14 @@ private fun TodayEmptyContent(modifier: Modifier = Modifier) {
             color = AppTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
-        Text(
-            text = stringResource(Res.string.main_today_empty_hint),
-            style = AppTheme.typography.caption,
-            color = AppTheme.colors.textSecondary,
-            textAlign = TextAlign.Center,
-        )
+        if (showPreparationHint) {
+            Text(
+                text = stringResource(Res.string.main_today_empty_hint),
+                style = AppTheme.typography.caption,
+                color = AppTheme.colors.textSecondary,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
