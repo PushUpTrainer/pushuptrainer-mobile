@@ -28,6 +28,8 @@ data class AppTypography(
     val body: TextStyle,
     /** Мелкая подпись, Regular 12/17. */
     val caption: TextStyle,
+    /** Акцентная мелкая подпись, Medium 12/18. */
+    val captionMedium: TextStyle,
     /** Подпись в нижней навигации, Medium 11/16. */
     val navLabel: TextStyle,
 )
@@ -43,6 +45,7 @@ val DefaultAppTypography = AppTypography(
     labelMedium = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
     body = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
     caption = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 17.sp),
+    captionMedium = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 18.sp),
     navLabel = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 16.sp),
 )
 
