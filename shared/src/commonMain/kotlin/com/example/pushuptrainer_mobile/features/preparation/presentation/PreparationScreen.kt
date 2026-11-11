@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationBar
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import com.example.pushuptrainer_mobile.LocalToggleTheme
+import org.koin.compose.viewmodel.koinViewModel
 import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorCard
 import com.example.pushuptrainer_mobile.core.uikit.components.howToPlacePhoneHint.HowToPlacePhoneHint
 import com.example.pushuptrainer_mobile.core.uikit.components.howToPlacePhoneRow.HowToPlacePhoneRow
@@ -43,17 +43,13 @@ import pushuptrainermobile.shared.generated.resources.preparation_start
 import pushuptrainermobile.shared.generated.resources.preparation_subtitle
 import pushuptrainermobile.shared.generated.resources.preparation_title
 
-/** Точка входа экрана для продакшена: берёт состояние из ViewModel. */
 @Composable
-fun PreparationRoute(
-    viewModel: PreparationViewModel,
-    modifier: Modifier = Modifier,
-) {
+internal fun PreparationRoot(viewModel: PreparationViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     PreparationScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        modifier = modifier,
+        onThemeToggle = LocalToggleTheme.current,
     )
 }
 
@@ -63,13 +59,14 @@ fun PreparationScreen(
     state: PreparationUiState,
     onEvent: (PreparationUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onThemeToggle: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(AppTheme.colors.background),
     ) {
-        Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -78,7 +75,7 @@ fun PreparationScreen(
                     .padding(horizontal = 20.dp),
             ) {
                 PreparationHeader(
-                    onThemeToggleClick = { onEvent(PreparationUiEvent.ThemeToggleClicked) },
+                    onThemeToggleClick = onThemeToggle,
                 )
                 Spacer(Modifier.height(20.dp))
                 PreparationModeSwitch(
@@ -104,14 +101,11 @@ fun PreparationScreen(
                 Spacer(Modifier.height(24.dp))
                 AppPrimaryButton(
                     text = stringResource(Res.string.preparation_start),
+                    enabled = false,
                     onClick = { onEvent(PreparationUiEvent.StartTrainingClicked) },
                 )
                 Spacer(Modifier.height(16.dp))
             }
-            BottomNavigationBar(
-                selected = BottomNavigationDestination.Trainer,
-                onDestinationClick = { onEvent(PreparationUiEvent.BottomBarDestinationClicked(it)) },
-            )
         }
 
         if (state.isHowToPlacePhoneVisible) {

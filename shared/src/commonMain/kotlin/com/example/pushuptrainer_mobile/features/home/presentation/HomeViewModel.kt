@@ -2,9 +2,7 @@ package com.example.pushuptrainer_mobile.features.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pushuptrainer_mobile.core.navigation.Destination
-import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
-import com.example.pushuptrainer_mobile.core.navigation.Router
+import com.example.pushuptrainer_mobile.core.uikit.components.streakCard.StreakCardUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.todaySummaryCard.TodaySummaryUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard.WeekCalendarUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard.WeekDayUiModel
@@ -17,12 +15,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDate
 
 internal class HomeViewModel(
-    private val entry: NavigationEntry,
-    private val preparation: Destination?,
-    private val router: Router,
     observeHomeHistory: ObserveHomeHistoryUseCase,
 ) : ViewModel() {
-    private val canPrepare = preparation != null
     val state = observeHomeHistory()
         .map<HomeHistory, HomeUiState> { history ->
             HomeUiState.Content(
@@ -41,15 +35,11 @@ internal class HomeViewModel(
                 } else {
                     TodaySummaryUiModel.Done(history.repetitionsToday, history.workoutsToday)
                 },
-                canPrepare = canPrepare,
+                streak = StreakCardUiModel(daysInRow = history.streakDays),
             )
         }
-        .catch { emit(HomeUiState.Unavailable(canPrepare)) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading(canPrepare))
-
-    fun onEvent(event: HomeUiEvent): Boolean = when (event) {
-        HomeUiEvent.PrepareClicked -> preparation?.let { router.open(entry, it) } ?: false
-    }
+        .catch { emit(HomeUiState.Unavailable) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), HomeUiState.Loading)
 }
 
 private fun LocalDate.dayAndMonth() =

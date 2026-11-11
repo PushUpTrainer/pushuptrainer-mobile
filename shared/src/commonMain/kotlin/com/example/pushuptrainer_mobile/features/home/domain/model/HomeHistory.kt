@@ -8,4 +8,5 @@ internal data class HomeHistory(
     val workoutDays: Set<LocalDate>,
     val repetitionsToday: Int,
     val workoutsToday: Int,
+    val streakDays: Int,
 )

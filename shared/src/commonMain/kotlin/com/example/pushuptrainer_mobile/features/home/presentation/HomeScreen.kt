@@ -20,10 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pushuptrainer_mobile.LocalToggleTheme
-import com.example.pushuptrainer_mobile.core.navigation.Destination
-import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
 import com.example.pushuptrainer_mobile.core.uikit.components.primaryButton.AppPrimaryButton
 import com.example.pushuptrainer_mobile.core.uikit.components.screenHeader.ScreenHeader
 import com.example.pushuptrainer_mobile.core.uikit.components.screenHeader.ScreenHeaderUiModel
@@ -42,14 +39,17 @@ import pushuptrainermobile.shared.generated.resources.main_history_unavailable
 
 @Composable
 internal fun HomeRoot(
-    entry: NavigationEntry,
-    preparation: Destination? = null,
-    viewModel: HomeViewModel = koinViewModel(parameters = { parametersOf(entry, preparation) }),
+    onPrepare: () -> Unit,
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     HomeScreen(
         state = state,
-        onEvent = { viewModel.onEvent(it) },
+        onEvent = { event ->
+            when (event) {
+                HomeUiEvent.PrepareClicked -> onPrepare()
+            }
+        },
         onThemeToggle = LocalToggleTheme.current,
     )
 }
@@ -64,14 +64,14 @@ fun HomeScreen(
     Column(modifier = modifier.fillMaxSize().background(AppTheme.colors.background)) {
         HomeHeader(onThemeToggle, Modifier.padding(horizontal = 20.dp))
         when (state) {
-            is HomeUiState.Loading -> Box(
+            HomeUiState.Loading -> Box(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator(color = AppTheme.colors.accent)
             }
 
-            is HomeUiState.Unavailable -> Box(
+            HomeUiState.Unavailable -> Box(
                 modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 20.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -85,7 +85,6 @@ fun HomeScreen(
         }
         AppPrimaryButton(
             text = stringResource(Res.string.main_prepare),
-            enabled = state.canPrepare,
             onClick = { onEvent(HomeUiEvent.PrepareClicked) },
             modifier = Modifier.padding(horizontal = 20.dp),
         )
@@ -99,13 +98,11 @@ private fun HomeContent(state: HomeUiState.Content, modifier: Modifier = Modifie
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
     ) {
         Spacer(Modifier.height(20.dp))
-        state.streak?.let { streak ->
-            StreakCard(model = streak, isHighlighted = state.today is TodaySummaryUiModel.Done)
-            Spacer(Modifier.height(16.dp))
-        }
+        StreakCard(model = state.streak, isHighlighted = state.today is TodaySummaryUiModel.Done)
+        Spacer(Modifier.height(16.dp))
         WeekCalendarCard(model = state.week)
         Spacer(Modifier.height(16.dp))
-        TodaySummaryCard(model = state.today, showPreparationHint = state.canPrepare)
+        TodaySummaryCard(model = state.today)
         Spacer(Modifier.height(16.dp))
     }
 }
@@ -160,7 +157,7 @@ private fun HomeAfterWorkoutLightPreview() {
 @Composable
 private fun HomeLoadingDarkPreview() {
     PushUpTrainerTheme(darkTheme = true) {
-        HomeScreen(state = HomeUiState.Loading(canPrepare = false), onEvent = {})
+        HomeScreen(state = HomeUiState.Loading, onEvent = {})
     }
 }
 
