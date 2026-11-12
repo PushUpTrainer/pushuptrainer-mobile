@@ -2,26 +2,26 @@ package com.example.pushuptrainer_mobile
 
 import androidx.room3.Room
 import com.example.pushuptrainer_mobile.data.local.database.WorkoutDatabase
+import com.example.pushuptrainer_mobile.data.local.database.createWorkoutDatabase
 import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutErrorEntity
 import com.example.pushuptrainer_mobile.data.local.database.entity.WorkoutSessionEntity
-import com.example.pushuptrainer_mobile.data.local.database.createWorkoutDatabase
 import com.example.pushuptrainer_mobile.data.local.datasource.WorkoutLocalDataSource
 import com.example.pushuptrainer_mobile.di.iosAppModules
 import com.example.pushuptrainer_mobile.features.home.domain.usecase.ObserveHomeHistoryUseCase
 import com.example.pushuptrainer_mobile.features.trainingresult.domain.usecase.GetTrainingResultUseCase
-import org.koin.dsl.koinApplication
-import org.koin.dsl.module
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.produceIn
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.produceIn
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 
 class WorkoutStorageIosTest {
     @Test
@@ -50,7 +50,7 @@ class WorkoutStorageIosTest {
             val workoutDate = Instant.fromEpochMilliseconds(session.startedAtEpochMs)
                 .toLocalDateTime(TimeZone.currentSystemDefault()).date
             assertEquals(setOf(workoutDate), home.workoutDays)
-            assertEquals(0, home.workoutsToday)
+            assertEquals(0, home.workouts)
             val result = getTrainingResult(session.id)
             assertEquals(8, result?.repetitions)
             assertEquals(10, result?.goal)

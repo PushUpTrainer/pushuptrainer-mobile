@@ -43,7 +43,6 @@ import pushuptrainermobile.shared.generated.resources.main_today_trainings_one
 fun TodaySummaryCard(
     model: TodaySummaryUiModel,
     modifier: Modifier = Modifier,
-    showPreparationHint: Boolean = true,
 ) {
     val cardModifier = modifier
         .fillMaxWidth()
@@ -53,20 +52,20 @@ fun TodaySummaryCard(
         .padding(16.dp)
 
     when (model) {
-        TodaySummaryUiModel.Empty -> TodayEmptyContent(showPreparationHint = showPreparationHint, modifier = cardModifier)
+        is TodaySummaryUiModel.Empty -> TodayEmptyContent(model = model, modifier = cardModifier)
         is TodaySummaryUiModel.Done -> TodayDoneContent(model = model, modifier = cardModifier)
     }
 }
 
 @Composable
-private fun TodayEmptyContent(showPreparationHint: Boolean, modifier: Modifier = Modifier) {
+private fun TodayEmptyContent(model: TodaySummaryUiModel.Empty, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = stringResource(Res.string.main_today_label),
+            text = model.dateLabel ?: stringResource(Res.string.main_today_label),
             style = AppTheme.typography.caption,
             color = AppTheme.colors.textSecondary,
             textAlign = TextAlign.Center,
@@ -77,7 +76,7 @@ private fun TodayEmptyContent(showPreparationHint: Boolean, modifier: Modifier =
             color = AppTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
-        if (showPreparationHint) {
+        if (model.dateLabel == null) {
             Text(
                 text = stringResource(Res.string.main_today_empty_hint),
                 style = AppTheme.typography.caption,
@@ -106,7 +105,7 @@ private fun TodayDoneContent(
         Spacer(Modifier.width(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = stringResource(Res.string.main_today_label),
+                text = model.dateLabel ?: stringResource(Res.string.main_today_label),
                 style = AppTheme.typography.caption,
                 color = AppTheme.colors.textSecondary,
             )
@@ -162,7 +161,7 @@ private fun TodaySummaryCardPreviewContent() {
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            TodaySummaryCard(model = TodaySummaryUiModel.Empty)
+            TodaySummaryCard(model = TodaySummaryUiModel.Empty())
             TodaySummaryCard(model = TodaySummaryUiModel.Done(repetitions = 16, trainings = 1))
         }
     }

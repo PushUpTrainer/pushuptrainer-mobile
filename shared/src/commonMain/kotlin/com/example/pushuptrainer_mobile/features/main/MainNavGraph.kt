@@ -34,7 +34,7 @@ internal fun MainNavGraph(content: @Composable (NavigationEntry, @Composable (Mo
         startDestination = HomeRoute,
         savedStateConfiguration = mainNavigationState,
         registerEntries = {
-            homeSection()
+            homeSection(mainEntry)
             preparationSection()
             trainingResultSection()
         },

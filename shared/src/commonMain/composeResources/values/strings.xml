@@ -118,4 +118,7 @@
     <string name="onboarding_appearance_hint">Смена Темы – вверху справа</string>
     <string name="onboarding_stat_total_repetitions">Всего повторений</string>
     <string name="onboarding_stat_record">Рекорд</string>
+    <string name="main_previous_week">Предыдущая неделя</string>
+    <string name="main_next_week">Следующая неделя</string>
+    <string name="main_retry">Повторить</string>
 </resources>

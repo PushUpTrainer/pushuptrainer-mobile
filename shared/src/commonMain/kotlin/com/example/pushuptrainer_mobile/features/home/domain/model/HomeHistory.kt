@@ -5,8 +5,10 @@ import kotlinx.datetime.LocalDate
 internal data class HomeHistory(
     val week: List<LocalDate>,
     val today: LocalDate,
+    val selectedDate: LocalDate,
     val workoutDays: Set<LocalDate>,
-    val repetitionsToday: Int,
-    val workoutsToday: Int,
+    val repetitions: Int,
+    val workouts: Int,
     val streakDays: Int,
+    val hasWorkoutToday: Boolean,
 )
