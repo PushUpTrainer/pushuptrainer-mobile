@@ -30,6 +30,12 @@ data class AppTypography(
     val caption: TextStyle,
     /** Подпись в нижней навигации, Medium 11/16. */
     val navLabel: TextStyle,
+    /** Заголовок раздела, SemiBold 22/28. */
+    val sectionTitle: TextStyle,
+    /** Число в карточке статистики, SemiBold 22/26. */
+    val statValue: TextStyle,
+    /** Подпись под числом статистики, Regular 11/16. */
+    val captionSmall: TextStyle,
 )
 
 private val BaseFontFamily = FontFamily.Default
@@ -44,6 +50,9 @@ val DefaultAppTypography = AppTypography(
     body = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
     caption = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 17.sp),
     navLabel = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 16.sp),
+    sectionTitle = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
+    statValue = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 26.sp),
+    captionSmall = TextStyle(fontFamily = BaseFontFamily, fontWeight = FontWeight.Normal, fontSize = 11.sp, lineHeight = 16.sp),
 )
 
 val LocalAppTypography = staticCompositionLocalOf { DefaultAppTypography }
