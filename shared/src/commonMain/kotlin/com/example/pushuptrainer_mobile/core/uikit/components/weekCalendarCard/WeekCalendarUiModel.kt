@@ -1,16 +1,21 @@
 package com.example.pushuptrainer_mobile.core.uikit.components.weekCalendarCard
 
-/** Данные карточки «Твоя неделя». */
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class WeekCalendarUiModel(
-    /** Подпись диапазона дат, например «19–25 октября». */
     val rangeText: String,
-    /** Дни недели с понедельника по воскресенье. */
     val days: List<WeekDayUiModel>,
+    val canGoForward: Boolean = false,
 )
 
-/** Один день в календаре недели. */
+@Immutable
 data class WeekDayUiModel(
     val dayOfMonth: Int,
     val isToday: Boolean,
     val hasWorkout: Boolean,
+    val epochDay: Long = 0,
+    val isSelected: Boolean = isToday,
+    val enabled: Boolean = true,
+    val dateLabel: String = dayOfMonth.toString(),
 )
