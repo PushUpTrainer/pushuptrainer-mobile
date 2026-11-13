@@ -16,16 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pushuptrainer_mobile.LocalToggleTheme
-import org.koin.compose.viewmodel.koinViewModel
 import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorCard
 import com.example.pushuptrainer_mobile.core.uikit.components.howToPlacePhoneHint.HowToPlacePhoneHint
 import com.example.pushuptrainer_mobile.core.uikit.components.howToPlacePhoneRow.HowToPlacePhoneRow
@@ -43,23 +39,12 @@ import pushuptrainermobile.shared.generated.resources.preparation_start
 import pushuptrainermobile.shared.generated.resources.preparation_subtitle
 import pushuptrainermobile.shared.generated.resources.preparation_title
 
-@Composable
-internal fun PreparationRoot(viewModel: PreparationViewModel = koinViewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    PreparationScreen(
-        state = state,
-        onEvent = viewModel::onEvent,
-        onThemeToggle = LocalToggleTheme.current,
-    )
-}
-
 /** Экран подготовки к тренировке (макеты 1.1.1 «Без цели», 1.1.2 «С целью», 1.1.0 подсказка). */
 @Composable
 fun PreparationScreen(
     state: PreparationUiState,
     onEvent: (PreparationUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onThemeToggle: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -75,7 +60,7 @@ fun PreparationScreen(
                     .padding(horizontal = 20.dp),
             ) {
                 PreparationHeader(
-                    onThemeToggleClick = onThemeToggle,
+                    onThemeToggleClick = { onEvent(PreparationUiEvent.ThemeToggleClicked) },
                 )
                 Spacer(Modifier.height(20.dp))
                 PreparationModeSwitch(
