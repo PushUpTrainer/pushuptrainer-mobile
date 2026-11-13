@@ -5,5 +5,5 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 internal val preparationModule = module {
-    viewModel { PreparationViewModel() }
+    viewModel { PreparationViewModel(savedStateHandle = get()) }
 }

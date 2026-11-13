@@ -1,6 +1,5 @@
 package com.example.pushuptrainer_mobile.features.preparation.presentation
 
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
 import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwitch.PreparationMode
 
 /** Действия пользователя на экране подготовки. */
@@ -27,8 +26,4 @@ sealed interface PreparationUiEvent {
     /** Нажата кнопка «Тема». */
     data object ThemeToggleClicked : PreparationUiEvent
 
-    /** Выбран раздел в нижней навигации. */
-    data class BottomBarDestinationClicked(
-        val destination: BottomNavigationDestination,
-    ) : PreparationUiEvent
 }
