@@ -1,29 +1,31 @@
 package com.example.pushuptrainer_mobile.features.onboarding.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.pushuptrainer_mobile.core.uikit.components.daySummaryCard.DaySummaryCard
 import com.example.pushuptrainer_mobile.core.uikit.components.daySummaryCard.DaySummaryUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorCard
+import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthCalendarCard
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthCalendarUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthDayPeriodUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthDayUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.poseIllustration.PoseIllustration
+import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwitch.PreparationMode
+import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwitch.PreparationModeSwitch
 import com.example.pushuptrainer_mobile.core.uikit.components.statTile.StatTile
 import com.example.pushuptrainer_mobile.core.uikit.components.statTile.StatTileIconUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.statTile.StatTileUiModel
@@ -42,6 +44,8 @@ import pushuptrainermobile.shared.generated.resources.onboarding_progress_day
 import pushuptrainermobile.shared.generated.resources.onboarding_progress_month
 import pushuptrainermobile.shared.generated.resources.onboarding_stat_record
 import pushuptrainermobile.shared.generated.resources.onboarding_stat_total_repetitions
+import pushuptrainermobile.shared.generated.resources.preparation_subtitle
+import pushuptrainermobile.shared.generated.resources.preparation_title
 
 /*
  * Иллюстрации шагов онбординга. Это неизменный пример интерфейса приложения,
@@ -49,28 +53,45 @@ import pushuptrainermobile.shared.generated.resources.onboarding_stat_total_repe
  */
 
 /**
- * Шаг 1. Место под пример экрана подготовки.
- *
- * TODO: после слияния ветки экрана подготовки заменить на PreparationModeSwitch
- *  и GoalSelectorCard из core/uikit (макет *4.1).
+ * Шаг 1. Уменьшенная копия верха экрана подготовки: заголовок, переключатель режима
+ * и карточка цели (макет *4.1). Нажатия ничего не делают — это только картинка.
  */
 @Composable
 internal fun ModesExample(modifier: Modifier = Modifier) {
-    ExamplePlaceholder(height = 286, modifier = modifier)
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.preparation_title),
+            style = AppTheme.typography.screenTitle.copy(fontSize = 20.sp, lineHeight = 26.sp),
+            color = AppTheme.colors.textPrimary,
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(Res.string.preparation_subtitle),
+            style = AppTheme.typography.body,
+            color = AppTheme.colors.textPrimary.copy(alpha = 0.6f),
+        )
+        Spacer(Modifier.height(20.dp))
+        PreparationModeSwitch(
+            selectedMode = PreparationMode.WithGoal,
+            onModeSelect = {},
+        )
+        Spacer(Modifier.height(16.dp))
+        GoalSelectorCard(
+            model = GoalSelectorUiModel(goal = 16, canDecrease = true, canIncrease = true),
+            onDecreaseClick = {},
+            onIncreaseClick = {},
+        )
+    }
 }
 
-/**
- * Шаг 2. Иллюстрация позы и подпись.
- *
- * TODO: после слияния ветки экрана подготовки заменить заглушку на PoseIllustration (макет *4.2).
- */
+/** Шаг 2. Иллюстрация позы и подпись (макет *4.2). */
 @Composable
 internal fun PhonePlacementExample(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ExamplePlaceholder(height = 208)
+        PoseIllustration()
         Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(Res.string.onboarding_camera_caption),
@@ -181,20 +202,6 @@ private fun ThemeColumn(
             }
         }
     }
-}
-
-@Composable
-private fun ExamplePlaceholder(
-    height: Int,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppTheme.colors.surface),
-    )
 }
 
 /** Демонстрационный октябрь 2026: сегодня 19-е, отмечены дни с тренировками. */
