@@ -16,16 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationBar
-import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
 import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorCard
 import com.example.pushuptrainer_mobile.core.uikit.components.howToPlacePhoneHint.HowToPlacePhoneHint
 import com.example.pushuptrainer_mobile.core.uikit.components.howToPlacePhoneRow.HowToPlacePhoneRow
@@ -43,20 +39,6 @@ import pushuptrainermobile.shared.generated.resources.preparation_start
 import pushuptrainermobile.shared.generated.resources.preparation_subtitle
 import pushuptrainermobile.shared.generated.resources.preparation_title
 
-/** Точка входа экрана для продакшена: берёт состояние из ViewModel. */
-@Composable
-fun PreparationRoute(
-    viewModel: PreparationViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    PreparationScreen(
-        state = state,
-        onEvent = viewModel::onEvent,
-        modifier = modifier,
-    )
-}
-
 /** Экран подготовки к тренировке (макеты 1.1.1 «Без цели», 1.1.2 «С целью», 1.1.0 подсказка). */
 @Composable
 fun PreparationScreen(
@@ -69,7 +51,7 @@ fun PreparationScreen(
             .fillMaxSize()
             .background(AppTheme.colors.background),
     ) {
-        Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -104,14 +86,11 @@ fun PreparationScreen(
                 Spacer(Modifier.height(24.dp))
                 AppPrimaryButton(
                     text = stringResource(Res.string.preparation_start),
+                    enabled = false,
                     onClick = { onEvent(PreparationUiEvent.StartTrainingClicked) },
                 )
                 Spacer(Modifier.height(16.dp))
             }
-            BottomNavigationBar(
-                selected = BottomNavigationDestination.Trainer,
-                onDestinationClick = { onEvent(PreparationUiEvent.BottomBarDestinationClicked(it)) },
-            )
         }
 
         if (state.isHowToPlacePhoneVisible) {

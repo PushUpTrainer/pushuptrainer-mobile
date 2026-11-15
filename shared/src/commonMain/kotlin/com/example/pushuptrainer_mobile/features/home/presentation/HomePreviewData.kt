@@ -24,7 +24,7 @@ internal object HomePreviewData {
     val beforeWorkout = HomeUiState.Content(
         streak = StreakCardUiModel(daysInRow = 2),
         week = week(hasWorkoutToday = false),
-        today = TodaySummaryUiModel.Empty,
+        today = TodaySummaryUiModel.Empty(),
     )
 
     /** Макет 1.0.1: сегодня тренировка уже была. */
