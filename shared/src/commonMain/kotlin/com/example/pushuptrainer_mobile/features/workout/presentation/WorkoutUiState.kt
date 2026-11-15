@@ -9,6 +9,9 @@ data class WorkoutUiState(
     val repetitions: String,
     val mode: WorkoutModeUiModel,
     val hint: WorkoutHintUiModel?,
+    val status: WorkoutStatus = WorkoutStatus.Running,
+    val cameraGeneration: Int = 0,
+    val showFinishConfirmation: Boolean = false,
 ) {
     val counter: WorkoutCounterUiModel
         get() = when (val currentMode = mode) {
@@ -16,3 +19,5 @@ data class WorkoutUiState(
             is WorkoutModeUiModel.Goal -> WorkoutCounterUiModel.Goal(repetitions, currentMode.target)
         }
 }
+
+enum class WorkoutStatus { Starting, Running, Paused, CameraError, Saving, SaveError, Saved }

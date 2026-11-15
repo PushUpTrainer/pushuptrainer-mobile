@@ -50,7 +50,7 @@ internal class TrainingResultViewModel(
     }
 
     fun onEvent(event: TrainingResultUiEvent): Boolean = when (event) {
-        TrainingResultUiEvent.StartNewTrainingClicked -> preparation?.let { router.replace(entry, it) } ?: false
+        TrainingResultUiEvent.StartNewTrainingClicked -> preparation?.let { router.returnTo(entry, it) || router.replace(entry, it) } ?: false
         TrainingResultUiEvent.GoToMainClicked -> router.navigateToHomeScreen(entry)
     }
 }

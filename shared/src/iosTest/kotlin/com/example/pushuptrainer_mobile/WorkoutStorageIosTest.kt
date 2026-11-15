@@ -9,6 +9,8 @@ import com.example.pushuptrainer_mobile.data.local.datasource.WorkoutLocalDataSo
 import com.example.pushuptrainer_mobile.di.iosAppModules
 import com.example.pushuptrainer_mobile.features.home.domain.usecase.ObserveHomeHistoryUseCase
 import com.example.pushuptrainer_mobile.features.trainingresult.domain.usecase.GetTrainingResultUseCase
+import com.example.pushuptrainer_mobile.features.workout.domain.model.CompletedWorkout
+import com.example.pushuptrainer_mobile.features.workout.domain.usecase.SaveWorkoutUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -24,6 +26,31 @@ import org.koin.dsl.koinApplication
 import org.koin.dsl.module
 
 class WorkoutStorageIosTest {
+    @Test
+    fun workoutSaveUseCasePersistsOneResultAndPreservesFirstSnapshotOnRetry() = runBlocking {
+        val database = createWorkoutDatabase(Room.inMemoryDatabaseBuilder<WorkoutDatabase>())
+        val application = koinApplication {
+            modules(iosAppModules, module { single<WorkoutDatabase> { database } })
+        }
+        try {
+            val save = application.koin.get<SaveWorkoutUseCase>()
+            val source = application.koin.get<WorkoutLocalDataSource>()
+            val getResult = application.koin.get<GetTrainingResultUseCase>()
+            val workout = CompletedWorkout("runtime-one", 1000, 42000, 5, 5, mapOf("HANDS_TOO_WIDE" to 2))
+            save(workout)
+            save(workout.copy(repetitions = 6))
+            assertEquals(1, source.observeSessions().first().size)
+            assertEquals(5L, source.observeTotalRepetitions().first())
+            assertEquals(42000L, source.getSession(workout.id)?.session?.durationMs)
+            assertEquals(2, source.getSession(workout.id)?.errors?.single()?.repetitions)
+            assertEquals(5, getResult(workout.id)?.repetitions)
+            assertEquals(5, getResult(workout.id)?.goal)
+        } finally {
+            application.close()
+            database.close()
+        }
+    }
+
     @Test
     fun savesReplacesAndDeletesWorkout() = runBlocking {
         val database = createWorkoutDatabase(Room.inMemoryDatabaseBuilder<WorkoutDatabase>())

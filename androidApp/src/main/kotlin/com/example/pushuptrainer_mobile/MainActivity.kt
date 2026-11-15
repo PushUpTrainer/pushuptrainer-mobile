@@ -1,6 +1,9 @@
 package com.example.pushuptrainer_mobile
 
 import android.os.Bundle
+import androidx.compose.runtime.CompositionLocalProvider
+import com.example.pushuptrainer_mobile.ml.presentation.LocalWorkoutCamera
+import com.example.pushuptrainer_mobile.ml.presentation.AndroidWorkoutCamera
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,10 +15,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            App { dark ->
-                WindowCompat.getInsetsController(window, window.decorView).apply {
-                    isAppearanceLightStatusBars = !dark
-                    isAppearanceLightNavigationBars = !dark
+            CompositionLocalProvider(LocalWorkoutCamera provides { AndroidWorkoutCamera(it) }) {
+                App { dark ->
+                    WindowCompat.getInsetsController(window, window.decorView).apply {
+                        isAppearanceLightStatusBars = !dark
+                        isAppearanceLightNavigationBars = !dark
+                    }
                 }
             }
         }

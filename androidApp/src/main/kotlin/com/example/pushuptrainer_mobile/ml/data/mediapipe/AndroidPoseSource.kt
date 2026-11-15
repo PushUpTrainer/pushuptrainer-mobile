@@ -25,6 +25,7 @@ class AndroidPoseSource(
     private val owner: LifecycleOwner,
     private val previewView: PreviewView,
     private val onError: (String) -> Unit,
+    private val onReady: () -> Unit,
 ) : PoseSource {
     private val context = previewView.context
     private val mainExecutor = ContextCompat.getMainExecutor(context)
@@ -81,6 +82,7 @@ class AndroidPoseSource(
                     current.analysis = analysis
                     analysis.setAnalyzer(current.executor) { image -> analyze(image, current) }
                     provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis)
+                    if (session === current) onReady()
                 } catch (error: Exception) {
                     stop()
                     onError(error.message ?: "Камера недоступна")

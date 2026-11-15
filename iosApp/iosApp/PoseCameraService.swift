@@ -14,6 +14,7 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
     private var frameDimensions: [Int: (Int32, Int32)] = [:]
     private var frameTimestamps: [Int] = []
     private var listener: PoseListener?
+    private var readyListener: (() -> Void)?
     private var errorListener: ((String) -> Void)?
     private var landmarker: PoseLandmarker?
     private var configured = false
@@ -27,6 +28,10 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
 
     func setErrorListener(listener: @escaping (String) -> Void) {
         errorListener = listener
+    }
+
+    func setReadyListener(listener: @escaping () -> Void) {
+        readyListener = listener
     }
 
     func resume() {
@@ -52,9 +57,11 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
 
     func stop() {
         shouldRun = false
-        sessionQueue.async { [weak self] in
-            guard let self, self.session.isRunning else { return }
-            self.session.stopRunning()
+        listener = nil
+        errorListener = nil
+        readyListener = nil
+        sessionQueue.async { [self] in
+            if session.isRunning { session.stopRunning() }
         }
     }
 
@@ -69,6 +76,10 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
                     self.session.startRunning()
                 }
                 guard self.session.isRunning else { throw CameraError.cameraUnavailable }
+                DispatchQueue.main.async { [weak self] in
+                    guard let self, self.shouldRun else { return }
+                    self.readyListener?()
+                }
             } catch {
                 self.reportError(error.localizedDescription)
             }
@@ -190,7 +201,8 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
 
     private func reportError(_ value: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.errorListener?(value)
+            guard let self, self.shouldRun else { return }
+            self.errorListener?(value)
         }
     }
 }
