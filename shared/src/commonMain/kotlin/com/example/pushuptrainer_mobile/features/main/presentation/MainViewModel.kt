@@ -1,5 +1,6 @@
 package com.example.pushuptrainer_mobile.features.main.presentation
 
+import com.example.pushuptrainer_mobile.features.progress.ProgressRoute
 import androidx.lifecycle.ViewModel
 import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
 import com.example.pushuptrainer_mobile.core.navigation.Router
@@ -14,15 +15,17 @@ internal class MainViewModel(private val router: Router) : ViewModel() {
     fun state(entry: NavigationEntry) = MainUiState(
         selected = when (entry.destination) {
             HomeRoute, PreparationRoute, is WorkoutRoute, is TrainingResultRoute -> BottomNavigationDestination.Trainer
+            ProgressRoute -> BottomNavigationDestination.Progress
             else -> error("Unknown Main destination: ${entry.destination}")
         },
-        available = setOf(BottomNavigationDestination.Trainer),
+        available = if (entry.destination is WorkoutRoute) emptySet() else setOf(BottomNavigationDestination.Trainer, BottomNavigationDestination.Progress),
     )
 
-    fun onEvent(entry: NavigationEntry, event: MainUiEvent): Boolean = when (event) {
+    fun onEvent(entry: NavigationEntry, event: MainUiEvent): Boolean = if (entry.destination is WorkoutRoute) false else when (event) {
         is MainUiEvent.TabSelected -> when (event.destination) {
             BottomNavigationDestination.Trainer -> router.navigateToHomeScreen(entry)
-            BottomNavigationDestination.Progress, BottomNavigationDestination.About -> false
+            BottomNavigationDestination.Progress -> router.returnTo(entry, ProgressRoute) || router.open(entry, ProgressRoute)
+            BottomNavigationDestination.About -> false
         }
     }
 }

@@ -1,6 +1,11 @@
 package com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +53,7 @@ fun MonthCalendarCard(
     onPreviousMonthClick: () -> Unit,
     onNextMonthClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onDayClick: (Long) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -76,6 +82,7 @@ fun MonthCalendarCard(
                 painter = painterResource(Res.drawable.ic_chevron_right),
                 contentDescription = stringResource(Res.string.month_calendar_next),
                 onClick = onNextMonthClick,
+                enabled = model.canGoForward,
             )
         }
         Spacer(Modifier.height(8.dp))
@@ -87,7 +94,7 @@ fun MonthCalendarCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    week.forEach { day -> MonthDayCell(day) }
+                    week.forEach { day -> MonthDayCell(day, onDayClick) }
                 }
             }
         }
@@ -99,12 +106,13 @@ private fun MonthArrow(
     painter: Painter,
     contentDescription: String,
     onClick: () -> Unit,
+    enabled: Boolean = true,
 ) {
-    IconButton(onClick = onClick, modifier = Modifier.size(44.dp)) {
+    IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(44.dp)) {
         Icon(
             painter = painter,
             contentDescription = contentDescription,
-            tint = AppTheme.colors.textSecondary,
+            tint = AppTheme.colors.textSecondary.copy(alpha = if (enabled) 1f else 0.4f),
             modifier = Modifier.size(18.dp),
         )
     }
@@ -130,14 +138,19 @@ private fun WeekdayRow() {
 }
 
 @Composable
-private fun MonthDayCell(day: MonthDayUiModel?) {
+private fun MonthDayCell(day: MonthDayUiModel?, onDayClick: (Long) -> Unit) {
     Box(
-        modifier = Modifier.size(CellSize),
+        modifier = Modifier.size(CellSize).then(
+            if (day?.epochDay != null) Modifier
+                .semantics { contentDescription = day.dateLabel; selected = day.isSelected }
+                .clickable(enabled = day.period != MonthDayPeriodUiModel.Future, role = Role.Button) { onDayClick(day.epochDay) }
+            else Modifier,
+        ),
         contentAlignment = Alignment.TopCenter,
     ) {
         if (day == null) return@Box
         val colors = AppTheme.colors
-        if (day.period == MonthDayPeriodUiModel.Today) {
+        if (day.isSelected) {
             Box(
                 modifier = Modifier
                     .size(TodayCircleSize)
@@ -148,9 +161,9 @@ private fun MonthDayCell(day: MonthDayUiModel?) {
         Text(
             text = day.dayOfMonth.toString(),
             style = AppTheme.typography.labelMedium,
-            color = when (day.period) {
+            color = if (day.isSelected) colors.onAccent else when (day.period) {
                 MonthDayPeriodUiModel.Past -> colors.textPrimary
-                MonthDayPeriodUiModel.Today -> colors.onAccent
+                MonthDayPeriodUiModel.Today -> colors.accent
                 MonthDayPeriodUiModel.Future -> colors.textSecondary
             },
             textAlign = TextAlign.Center,

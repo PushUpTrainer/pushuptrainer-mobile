@@ -5,9 +5,10 @@ import com.example.pushuptrainer_mobile.features.main.di.mainModule
 import com.example.pushuptrainer_mobile.features.onboarding.di.onboardingModule
 import com.example.pushuptrainer_mobile.features.preparation.di.preparationModule
 import com.example.pushuptrainer_mobile.features.trainingresult.di.trainingResultModule
+import com.example.pushuptrainer_mobile.features.progress.di.progressModule
 import org.koin.dsl.module
 import com.example.pushuptrainer_mobile.features.workout.di.workoutModule
 
 internal val sharedFeatureModules = module {
-    includes(workoutModule, onboardingModule, mainModule, homeModule, preparationModule, trainingResultModule)
+    includes(progressModule, workoutModule, onboardingModule, mainModule, homeModule, preparationModule, trainingResultModule)
 }
