@@ -3,6 +3,11 @@ package com.example.pushuptrainer_mobile.core.navigation
 import androidx.navigation3.runtime.NavKey
 import com.example.pushuptrainer_mobile.core.navigation.di.GlobalRouterContext
 import com.example.pushuptrainer_mobile.di.sharedModules
+import com.example.pushuptrainer_mobile.features.about.AboutRoute
+import com.example.pushuptrainer_mobile.features.main.presentation.MainViewModel
+import com.example.pushuptrainer_mobile.features.main.presentation.MainUiEvent
+import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import com.example.pushuptrainer_mobile.features.workout.WorkoutRoute
 import com.example.pushuptrainer_mobile.features.home.HomeRoute
 import com.example.pushuptrainer_mobile.features.main.MainRoute
 import com.example.pushuptrainer_mobile.features.main.di.MainRouterContext
@@ -18,6 +23,32 @@ import org.koin.core.qualifier.qualifier
 import org.koin.dsl.koinApplication
 
 class NavigationTest {
+    @Test
+    fun aboutTabDoesNotDuplicateAndCannotBypassActiveWorkout() {
+        val router = StackRouter()
+        val home = HomeRoute.newEntry()
+        val stack = mutableListOf<NavKey>(home)
+        router.attach(stack) { true }
+        val viewModel = MainViewModel(router)
+        val openAbout = MainUiEvent.TabSelected(BottomNavigationDestination.About)
+        assertTrue(viewModel.onEvent(home, openAbout))
+        val about = stack.last() as NavigationEntry
+        assertEquals(AboutRoute, about.destination)
+        assertEquals(BottomNavigationDestination.About, viewModel.state(about).selected)
+        viewModel.onEvent(about, openAbout)
+        assertEquals(2, stack.size)
+        assertTrue(router.back(about))
+        assertEquals(listOf<NavKey>(home), stack)
+        assertTrue(viewModel.onEvent(home, openAbout))
+        assertTrue(viewModel.onEvent(stack.last() as NavigationEntry, MainUiEvent.TabSelected(BottomNavigationDestination.Trainer)))
+        assertEquals(listOf<NavKey>(home), stack)
+        assertTrue(router.open(home, WorkoutRoute(null)))
+        val workout = stack.last() as NavigationEntry
+        assertTrue(viewModel.state(workout).available.isEmpty())
+        assertFalse(viewModel.onEvent(workout, openAbout))
+        assertEquals(workout, stack.last())
+    }
+
     @Test
     fun eachGraphGetsItsOwnSingletonRouter() {
         val application = koinApplication { modules(sharedModules) }
