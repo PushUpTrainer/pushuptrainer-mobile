@@ -46,8 +46,23 @@ internal fun calculateProgress(
     val valid = workouts.filter { it.repetitions > 0 }
     val byDay = valid.groupBy { Instant.fromEpochMilliseconds(it.startedAtEpochMs).toLocalDateTime(zone).date }
     val day = byDay[selected].orEmpty()
+    val total = valid.sumOf { it.repetitions.toLong() }
+    var streakDay = today.toEpochDays() - if (today in byDay) 0 else 1
+    var streak = 0
+    while (LocalDate.fromEpochDays(streakDay) in byDay) {
+        streak++
+        streakDay--
+    }
     return ProgressHistory(
-        today, selected, byDay.keys, day.size, day.sumOf { it.repetitions },
-        valid.sumOf { it.repetitions.toLong() }, valid.maxOfOrNull { it.repetitions } ?: 0,
+        today = today,
+        selectedDate = selected,
+        workoutDays = byDay.keys,
+        dayWorkouts = day.size,
+        dayRepetitions = day.sumOf { it.repetitions },
+        totalRepetitions = total,
+        bestWorkout = valid.maxOfOrNull { it.repetitions } ?: 0,
+        totalWorkouts = valid.size,
+        averageRepetitions = if (valid.isEmpty()) 0.0 else total.toDouble() / valid.size,
+        streakDays = streak,
     )
 }

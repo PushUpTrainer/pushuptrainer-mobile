@@ -12,4 +12,7 @@ data class ProgressHistory(
     val dayRepetitions: Int,
     val totalRepetitions: Long,
     val bestWorkout: Int,
+    val totalWorkouts: Int,
+    val averageRepetitions: Double,
+    val streakDays: Int,
 )

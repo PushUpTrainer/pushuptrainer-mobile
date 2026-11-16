@@ -21,7 +21,7 @@ Use the run configurations provided by the run widget in your IDE's toolbar. You
 
 Android uses CameraX and MediaPipe Pose Landmarker. iOS uses AVFoundation and MediaPipe Pose Landmarker. Both platform adapters feed the same 12 pose points into the shared workout counter. Preparation opens a goal-based or free workout; reaching the goal or finishing manually saves a nonzero result in Room. Workouts with zero repetitions return to preparation without saving. Backgrounding pauses the camera and counting until Continue is selected. Back asks to confirm finishing. The camera preview displays visible pose points and their connections. Both platforms use MediaPipe 1.1.1.
 
-Progress displays a monthly calendar, the selected day's workout and repetition counts, total repetitions, and the best workout. Home and Progress exclude legacy zero-repetition sessions from their summaries.
+Progress displays a monthly calendar, a current workout streak, the selected day's summary, and four all-time metrics: total repetitions, workout count, best workout, and average repetitions per workout. Days without workouts show an empty message; an empty history offers a shortcut to preparation. Home and Progress exclude legacy zero-repetition sessions from their summaries.
 
 ### Running tests
 

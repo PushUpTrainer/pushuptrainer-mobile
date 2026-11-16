@@ -1,0 +1,120 @@
+Window: "iPhone 17e", App: Device Hub.
+0 standard window iPhone 17e – iOS 27.2, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise
+	1 split group
+		2 split group com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, SidebarNavigationSplitView
+			3 scroll area
+				4 list Sidebar
+					5 row (selectable) Description: Available, Value: Expanded
+					6 row (selected) Description: Iphone, Value: iPhone 17e
+27.2
+Simulator
+					7 row (selectable) Description: iphone.gen3, Value: iPhone 18 Pro
+27.2
+Simulator
+					8 row (selectable) Description: iphone.gen3, Value: PushUpTrainer Home QA
+27.2
+Simulator
+					9 row (selectable) Description: iphone.gen3, Value: iPhone 17
+27.2
+Simulator
+					10 row (selectable) Description: Unavailable, Value: Collapsed
+			11 search text field (settable) Search
+				12 button Search
+			13 splitter (disabled, settable, float) 248
+			14 container
+				15 container
+					16 text Description: Прогресс, Secondary Actions: Cancel
+					17 button Description: Тема, Secondary Actions: Cancel
+					18 text Description: Регулярность и результаты, Secondary Actions: Cancel
+					19 text Description: 4 дня подряд, Secondary Actions: Cancel
+					20 text Description: Серия тренировок, Secondary Actions: Cancel
+					21 button Description: Предыдущий месяц, Secondary Actions: Cancel
+					22 text Description: Ноябрь 2026, Secondary Actions: Cancel
+					23 button (disabled) Description: Следующий месяц, Secondary Actions: Cancel
+					24 text Description: ПН, Secondary Actions: Cancel
+					25 text Description: ВТ, Secondary Actions: Cancel
+					26 text Description: СР, Secondary Actions: Cancel
+					27 text Description: ЧТ, Secondary Actions: Cancel
+					28 text Description: ПТ, Secondary Actions: Cancel
+					29 text Description: СБ, Secondary Actions: Cancel
+					30 text Description: ВС, Secondary Actions: Cancel
+					31 button Description: 2026-11-01, 1, Secondary Actions: Cancel
+					32 button Description: 2026-11-02, 2, Secondary Actions: Cancel
+					33 button Description: 2026-11-03, 3, Secondary Actions: Cancel
+					34 button Description: 2026-11-04, 4, Secondary Actions: Cancel
+					35 button Description: 2026-11-05, 5, Secondary Actions: Cancel
+					36 button Description: 2026-11-06, 6, Secondary Actions: Cancel
+					37 button Description: 2026-11-07, 7, Secondary Actions: Cancel
+					38 button Description: 2026-11-08, 8, Secondary Actions: Cancel
+					39 button Description: 2026-11-09, 9, Secondary Actions: Cancel
+					40 button Description: 2026-11-10, 10, Secondary Actions: Cancel
+					41 button Description: 2026-11-11, 11, Secondary Actions: Cancel
+					42 button Description: 2026-11-12, 12, Secondary Actions: Cancel
+					43 button Description: 2026-11-13, 13, Secondary Actions: Cancel
+					44 button Description: 2026-11-14, 14, Secondary Actions: Cancel
+					45 button Description: 2026-11-15, 15, Secondary Actions: Cancel
+					46 button (selected) Description: 2026-11-16, 16, Secondary Actions: Cancel
+					47 button (disabled) Description: 2026-11-17, 17, Secondary Actions: Cancel
+					48 button (disabled) Description: 2026-11-18, 18, Secondary Actions: Cancel
+					49 button (disabled) Description: 2026-11-19, 19, Secondary Actions: Cancel
+					50 button (disabled) Description: 2026-11-20, 20, Secondary Actions: Cancel
+					51 button (disabled) Description: 2026-11-21, 21, Secondary Actions: Cancel
+					52 button (disabled) Description: 2026-11-22, 22, Secondary Actions: Cancel
+					53 button (disabled) Description: 2026-11-23, 23, Secondary Actions: Cancel
+					54 button (disabled) Description: 2026-11-24, 24, Secondary Actions: Cancel
+					55 button (disabled) Description: 2026-11-25, 25, Secondary Actions: Cancel
+					56 button (disabled) Description: 2026-11-26, 26, Secondary Actions: Cancel
+					57 button (disabled) Description: 2026-11-27, 27, Secondary Actions: Cancel
+					58 button (disabled) Description: 2026-11-28, 28, Secondary Actions: Cancel
+					59 button (disabled) Description: 2026-11-29, 29, Secondary Actions: Cancel
+					60 button (disabled) Description: 2026-11-30, 30, Secondary Actions: Cancel
+					61 text Description: 16 ноября · Сегодня, Secondary Actions: Cancel
+					62 text Description: 1, Secondary Actions: Cancel
+					63 text Description: тренировка, Secondary Actions: Cancel
+					64 text Description: 13, Secondary Actions: Cancel
+					65 text Description: повторений, Secondary Actions: Cancel
+					66 text Description: За всё время, Secondary Actions: Cancel
+					67 text Description: 86, Secondary Actions: Cancel
+					68 text Description: 6, Secondary Actions: Cancel
+					69 text Description: Всего повторений, Secondary Actions: Cancel
+					70 text Description: Тренировки, Secondary Actions: Cancel
+					71 text Description: 16, Secondary Actions: Cancel
+					72 text Description: 14,3, Secondary Actions: Cancel
+					73 button Description: Тренажёр, Secondary Actions: Cancel
+					74 button (selected) Description: Прогресс, Secondary Actions: Cancel
+					75 button (disabled) Description: О проекте, Secondary Actions: Cancel
+				76 button Description: Home, ID: app.grid.3x3
+				77 button Description: Screenshot, ID: camera.viewfinder
+				78 button Description: Record, Help: Record Screen, ID: record.circle
+				79 button Rotate Left
+	80 toolbar
+		81 menu button Add, Help: Add Device, ID: plus
+		82 toggle button Description: Filter, Help: Sort and Filter, Value: off
+		83 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		84 toggle button Description: Capture Keyboard, Value: on
+		85 toggle button Description: Resize mode, Help: Enter resize mode, Value: off
+		86 Zoom
+			87 radio button Description: Zoom Out, Value: 0, ID: minus.magnifyingglass
+			88 radio button Description: arrowtriangles.up.right.down.left.magnifyingglass, Help: Zoom to Fit, Value: 1
+			89 radio button Description: Zoom To Actual Size, Help: Physical Size, Value: 0, ID: 1.magnifyingglass
+			90 radio button Description: Zoom In, Value: 0, ID: plus.magnifyingglass
+		91 button Description: Switch to compact window, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		92 menu button More, Help: More Actions, ID: ellipsis
+		93 radio button Description: Edit, Help: Settings, Value: 0, ID: slider.horizontal.3
+		94 radio button Description: text.document, Help: Reports, Value: 0
+		95 radio button Description: Info, Value: 0, ID: info
+	96 close button
+	97 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	98 minimize button
+	99 text iPhone 17e iOS 27.2
+100 menu bar
+	101 Device Hub
+	102 File
+	103 Edit
+	104 View
+	105 Device
+	106 Controls
+	107 Window
+	108 Help
+
+The focused UI element is 0 standard window iPhone 17e – iOS 27.2, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise

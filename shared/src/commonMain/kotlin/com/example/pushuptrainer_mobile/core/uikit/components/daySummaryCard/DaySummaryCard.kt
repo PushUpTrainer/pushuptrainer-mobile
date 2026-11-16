@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.text.russianPluralString
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
+import org.jetbrains.compose.resources.stringResource
+import pushuptrainermobile.shared.generated.resources.progress_empty_today
+import pushuptrainermobile.shared.generated.resources.progress_empty_day
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import pushuptrainermobile.shared.generated.resources.Res
@@ -57,7 +60,13 @@ fun DaySummaryCard(
             color = AppTheme.colors.textSecondary,
         )
         Spacer(Modifier.height(9.dp))
-        Row(modifier = Modifier.fillMaxWidth()) {
+        if (model.emptyDay != null) {
+            Text(
+                text = stringResource(if (model.emptyDay == EmptyDayUiModel.Today) Res.string.progress_empty_today else Res.string.progress_empty_day),
+                style = AppTheme.typography.body,
+                color = AppTheme.colors.textSecondary,
+            )
+        } else Row(modifier = Modifier.fillMaxWidth()) {
             DayStat(
                 icon = Res.drawable.ic_calendar,
                 value = model.trainings,

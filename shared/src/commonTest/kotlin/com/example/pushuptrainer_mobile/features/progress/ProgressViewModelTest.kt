@@ -1,5 +1,13 @@
 package com.example.pushuptrainer_mobile.features.progress
 
+import androidx.navigation3.runtime.NavKey
+import com.example.pushuptrainer_mobile.core.navigation.StackRouter
+import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+import com.example.pushuptrainer_mobile.core.navigation.newEntry
+import com.example.pushuptrainer_mobile.features.home.HomeRoute
+import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
+import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.pushuptrainer_mobile.features.progress.domain.model.ProgressWorkout
@@ -37,10 +45,20 @@ abstract class ProgressViewModelTest {
         val clock = object : Clock { override fun now() = Instant.parse("2026-11-16T12:00:00Z") }
         val useCase = ObserveProgressUseCase(repository, clock) { TimeZone.UTC }
         val handle = SavedStateHandle()
-        val vm = ProgressViewModel(useCase, handle)
+        val entry = ProgressRoute.newEntry()
+        val router = StackRouter()
+        val stack = mutableListOf<NavKey>(HomeRoute.newEntry(), entry)
+        val detach = router.attach(stack) { true }
+        val vm = ProgressViewModel(useCase, handle, entry, router)
         try {
             runCurrent()
             assertEquals("0", (vm.state.value as ProgressUiState.Content).totalRepetitions)
+            assertTrue((vm.state.value as ProgressUiState.Content).isHistoryEmpty)
+            vm.onEvent(ProgressUiEvent.PrepareClicked)
+            vm.onEvent(ProgressUiEvent.PrepareClicked)
+            assertEquals(3, stack.size)
+            assertEquals(PreparationRoute, (stack.last() as NavigationEntry).destination)
+            router.back(stack.last() as NavigationEntry)
             workouts.value = listOf(
                 ProgressWorkout(today.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(), 8),
                 ProgressWorkout(previous.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(), 12),
@@ -50,7 +68,7 @@ abstract class ProgressViewModelTest {
             vm.onEvent(ProgressUiEvent.PreviousMonthClicked)
             runCurrent()
             assertEquals(12, (vm.state.value as ProgressUiState.Content).day.repetitions)
-            val restored = ProgressViewModel(useCase, SavedStateHandle(handle.keys().associateWith { handle.get<Any?>(it) }))
+            val restored = ProgressViewModel(useCase, SavedStateHandle(handle.keys().associateWith { handle.get<Any?>(it) }), entry, router)
             try {
                 runCurrent()
                 assertEquals(previous.toEpochDays(), (restored.state.value as ProgressUiState.Content).selectedEpochDay)
@@ -64,7 +82,23 @@ abstract class ProgressViewModelTest {
             assertEquals(today.toEpochDays(), content.selectedEpochDay)
             assertEquals("20", content.totalRepetitions)
             assertEquals("12", content.bestWorkout)
+            assertEquals("2", content.totalWorkouts)
+            assertEquals("10", content.averageRepetitions)
+            assertEquals(1, content.streak.daysInRow)
+            assertFalse(content.isHistoryEmpty)
+            workouts.value = emptyList()
+            runCurrent()
+            val empty = vm.state.value as ProgressUiState.Content
+            assertTrue(empty.isHistoryEmpty)
+            assertEquals("0", empty.totalWorkouts)
+            assertEquals("0", empty.averageRepetitions)
+            assertEquals(0, empty.streak.daysInRow)
+            val preparation = PreparationRoute.newEntry()
+            stack.add(1, preparation)
+            vm.onEvent(ProgressUiEvent.PrepareClicked)
+            assertEquals(listOf(stack.first(), preparation), stack)
         } finally {
+            detach()
             vm.viewModelScope.cancel()
             Dispatchers.resetMain()
         }

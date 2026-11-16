@@ -7,6 +7,7 @@ internal sealed interface ProgressUiEvent {
     data object TodayClicked : ProgressUiEvent
     data object ThemeToggleClicked : ProgressUiEvent
     data object RetryClicked : ProgressUiEvent
+    data object PrepareClicked : ProgressUiEvent
 }
 
 internal enum class ProgressUiEffect { ToggleTheme }

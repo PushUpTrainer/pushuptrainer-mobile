@@ -1,6 +1,15 @@
 <resources>
-    <string name="progress_subtitle">Тренировки и результаты по дням</string>
+    <string name="progress_subtitle">Регулярность и результаты</string>
     <string name="progress_today">Сегодня</string>
     <string name="progress_total">Всего повторений</string>
-    <string name="progress_record">Рекорд за тренировку</string>
+    <string name="progress_record">Рекорд</string>
+    <string name="progress_trainings">Тренировки</string>
+    <string name="progress_average">Среднее</string>
+    <string name="progress_all_time">За всё время</string>
+    <string name="progress_empty_today">Сегодня тренировок пока нет</string>
+    <string name="progress_empty_day">В этот день тренировок не было</string>
+    <string name="progress_empty_title">Здесь появится ваш прогресс</string>
+    <string name="progress_empty_description">Проведите первую тренировку,\nчтобы увидеть статистику и рекорды.</string>
+    <string name="streak_start">Начните серию</string>
+    <string name="streak_start_caption">Первая тренировка - первый день</string>
 </resources>

@@ -3,6 +3,10 @@ package com.example.pushuptrainer_mobile.features.progress.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+import com.example.pushuptrainer_mobile.core.navigation.Router
+import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
+import com.example.pushuptrainer_mobile.features.preparation.navigateToPreparationScreen
 import com.example.pushuptrainer_mobile.features.progress.domain.usecase.ObserveProgressUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -18,6 +22,8 @@ import kotlinx.datetime.plus
 internal class ProgressViewModel(
     private val observeProgress: ObserveProgressUseCase,
     private val savedStateHandle: SavedStateHandle,
+    private val entry: NavigationEntry,
+    private val router: Router,
 ) : ViewModel() {
     private val _state = MutableStateFlow<ProgressUiState>(ProgressUiState.Loading)
     val state = _state.asStateFlow()
@@ -37,6 +43,9 @@ internal class ProgressViewModel(
                 observeHistory()
             }
             ProgressUiEvent.RetryClicked -> observeHistory()
+            ProgressUiEvent.PrepareClicked -> {
+                if (!router.returnTo(entry, PreparationRoute)) router.navigateToPreparationScreen(entry)
+            }
             ProgressUiEvent.ThemeToggleClicked -> viewModelScope.launch { _effects.send(ProgressUiEffect.ToggleTheme) }
         }
     }
