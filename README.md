@@ -19,7 +19,7 @@ Use the run configurations provided by the run widget in your IDE's toolbar. You
 - Android app: `./gradlew :androidApp:assembleDebug`
 - iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
-Android uses CameraX and MediaPipe Pose Landmarker. iOS uses AVFoundation and MediaPipe Pose Landmarker. Both platform adapters produce the same 12 pose points for the shared counter. The camera adapters are not connected to the app UI yet.
+Android uses CameraX and MediaPipe Pose Landmarker. iOS uses AVFoundation and MediaPipe Pose Landmarker. Both platform adapters feed the same 12 pose points into the shared workout counter. Preparation opens a goal-based or free workout; reaching the goal or finishing manually saves the result in Room. Backgrounding pauses the camera and counting until Continue is selected. Back asks to finish and save.
 
 ### Running tests
 

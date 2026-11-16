@@ -86,7 +86,6 @@ fun PreparationScreen(
                 Spacer(Modifier.height(24.dp))
                 AppPrimaryButton(
                     text = stringResource(Res.string.preparation_start),
-                    enabled = false,
                     onClick = { onEvent(PreparationUiEvent.StartTrainingClicked) },
                 )
                 Spacer(Modifier.height(16.dp))

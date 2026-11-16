@@ -1,5 +1,12 @@
 package com.example.pushuptrainer_mobile.features.preparation.presentation
 
+import com.example.pushuptrainer_mobile.core.navigation.StackRouter
+import com.example.pushuptrainer_mobile.core.navigation.newEntry
+import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
+import com.example.pushuptrainer_mobile.features.workout.WorkoutRoute
+import com.example.pushuptrainer_mobile.features.main.presentation.MainViewModel
+import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationDestination
+import org.koin.core.parameter.parametersOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwitch.PreparationMode
@@ -28,7 +35,7 @@ import org.koin.dsl.module
 class PreparationViewModelTest {
     @Test
     fun goalStopsAtBothBoundsAndCanMoveBackFromThem() {
-        val viewModel = PreparationViewModel(SavedStateHandle())
+        val viewModel = createViewModel(SavedStateHandle())
         assertEquals(20, viewModel.state.value.goal.goal)
         repeat(120) { viewModel.onEvent(PreparationUiEvent.GoalDecreaseClicked) }
         assertEquals(1, viewModel.state.value.goal.goal)
@@ -50,14 +57,14 @@ class PreparationViewModelTest {
     @Test
     fun modeGoalAndHintRestoreWithoutSharingMutableState() {
         val handle = SavedStateHandle()
-        val viewModel = PreparationViewModel(handle)
+        val viewModel = createViewModel(handle)
         repeat(5) { viewModel.onEvent(PreparationUiEvent.GoalIncreaseClicked) }
         viewModel.onEvent(PreparationUiEvent.ModeSelected(PreparationMode.WithoutGoal))
         viewModel.onEvent(PreparationUiEvent.GoalDecreaseClicked)
         viewModel.onEvent(PreparationUiEvent.GoalIncreaseClicked)
         viewModel.onEvent(PreparationUiEvent.HowToPlacePhoneClicked)
         assertEquals(25, viewModel.state.value.goal.goal)
-        val restored = PreparationViewModel(
+        val restored = createViewModel(
             SavedStateHandle(handle.keys().associateWith { handle.get<Any?>(it) }),
         )
         assertEquals(viewModel.state.value, restored.state.value)
@@ -73,7 +80,7 @@ class PreparationViewModelTest {
     @Test
     fun invalidRestoredValuesUseSupportedModeAndGoalBounds() {
         for ((saved, expected) in listOf(Int.MIN_VALUE to 1, Int.MAX_VALUE to 100)) {
-            val viewModel = PreparationViewModel(
+            val viewModel = createViewModel(
                 SavedStateHandle(mapOf("preparation.mode" to "obsolete", "preparation.goal" to saved)),
             )
             assertEquals(PreparationMode.WithGoal, viewModel.state.value.selectedMode)
@@ -84,7 +91,7 @@ class PreparationViewModelTest {
     @Test
     fun themeEventsAreConsumedOnceAndKeepPreparationState() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-        val viewModel = PreparationViewModel(SavedStateHandle())
+        val viewModel = createViewModel(SavedStateHandle())
         try {
             viewModel.onEvent(PreparationUiEvent.GoalIncreaseClicked)
             val state = viewModel.state.value
@@ -115,8 +122,8 @@ class PreparationViewModelTest {
             modules(sharedModules, module { factory { SavedStateHandle() } })
         }
         try {
-            val first = application.koin.get<PreparationViewModel>()
-            val second = application.koin.get<PreparationViewModel>()
+            val first = application.koin.get<PreparationViewModel> { parametersOf(PreparationRoute.newEntry()) }
+            val second = application.koin.get<PreparationViewModel> { parametersOf(PreparationRoute.newEntry()) }
             first.onEvent(PreparationUiEvent.HowToPlacePhoneClicked)
             assertTrue(first.state.value.isHowToPlacePhoneVisible)
             assertFalse(second.state.value.isHowToPlacePhoneVisible)
@@ -125,4 +132,27 @@ class PreparationViewModelTest {
             application.close()
         }
     }
+    @Test
+    fun startPassesSelectedGoalAndDoesNotDuplicateWorkout() {
+        val entry = PreparationRoute.newEntry()
+        val stack = mutableListOf<androidx.navigation3.runtime.NavKey>(entry)
+        val router = StackRouter().also { it.attach(stack) { true } }
+        val viewModel = PreparationViewModel(SavedStateHandle(), router, entry)
+        viewModel.onEvent(PreparationUiEvent.GoalIncreaseClicked)
+        repeat(2) { viewModel.onEvent(PreparationUiEvent.StartTrainingClicked) }
+        assertEquals(2, stack.size)
+        val workout = stack.last() as com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+        assertEquals(WorkoutRoute(21), workout.destination)
+        assertEquals(BottomNavigationDestination.Trainer, MainViewModel(router).state(workout).selected)
+        router.back(workout)
+        viewModel.onEvent(PreparationUiEvent.ModeSelected(PreparationMode.WithoutGoal))
+        viewModel.onEvent(PreparationUiEvent.StartTrainingClicked)
+        val freeWorkout = stack.last() as com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+        assertEquals(WorkoutRoute(null), freeWorkout.destination)
+        assertEquals(BottomNavigationDestination.Trainer, MainViewModel(router).state(freeWorkout).selected)
+    }
+
+    private fun createViewModel(handle: SavedStateHandle) =
+        PreparationViewModel(handle, StackRouter(), PreparationRoute.newEntry())
+
 }

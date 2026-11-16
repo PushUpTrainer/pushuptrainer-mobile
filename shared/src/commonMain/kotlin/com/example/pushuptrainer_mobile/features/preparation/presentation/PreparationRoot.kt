@@ -9,10 +9,16 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.example.pushuptrainer_mobile.LocalToggleTheme
+import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+import com.example.pushuptrainer_mobile.core.navigation.LocalNavigationEntry
+import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun PreparationRoot(viewModel: PreparationViewModel = koinViewModel()) {
+internal fun PreparationRoot(
+    entry: NavigationEntry = LocalNavigationEntry.current,
+    viewModel: PreparationViewModel = koinViewModel(parameters = { parametersOf(entry) }),
+) {
     val toggleTheme by rememberUpdatedState(LocalToggleTheme.current)
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->

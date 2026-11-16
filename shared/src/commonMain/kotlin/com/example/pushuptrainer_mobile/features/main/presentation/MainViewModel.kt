@@ -8,11 +8,12 @@ import com.example.pushuptrainer_mobile.features.home.HomeRoute
 import com.example.pushuptrainer_mobile.features.home.navigateToHomeScreen
 import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
 import com.example.pushuptrainer_mobile.features.trainingresult.TrainingResultRoute
+import com.example.pushuptrainer_mobile.features.workout.WorkoutRoute
 
 internal class MainViewModel(private val router: Router) : ViewModel() {
     fun state(entry: NavigationEntry) = MainUiState(
         selected = when (entry.destination) {
-            HomeRoute, PreparationRoute, is TrainingResultRoute -> BottomNavigationDestination.Trainer
+            HomeRoute, PreparationRoute, is WorkoutRoute, is TrainingResultRoute -> BottomNavigationDestination.Trainer
             else -> error("Unknown Main destination: ${entry.destination}")
         },
         available = setOf(BottomNavigationDestination.Trainer),

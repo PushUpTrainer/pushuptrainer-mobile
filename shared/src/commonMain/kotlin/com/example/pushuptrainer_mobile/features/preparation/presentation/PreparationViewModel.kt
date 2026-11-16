@@ -1,5 +1,8 @@
 package com.example.pushuptrainer_mobile.features.preparation.presentation
 
+import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
+import com.example.pushuptrainer_mobile.core.navigation.Router
+import com.example.pushuptrainer_mobile.features.workout.WorkoutRoute
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,15 +16,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-private const val MIN_GOAL = 1
-private const val MAX_GOAL = 100
-private const val DEFAULT_GOAL = 20
-private const val MODE_KEY = "preparation.mode"
-private const val GOAL_KEY = "preparation.goal"
-private const val HINT_KEY = "preparation.hint"
-
 internal class PreparationViewModel(
     private val savedStateHandle: SavedStateHandle,
+    private val router: Router,
+    private val entry: NavigationEntry,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         PreparationUiState(
@@ -47,7 +45,10 @@ internal class PreparationViewModel(
             PreparationUiEvent.ThemeToggleClicked -> viewModelScope.launch {
                 _effects.send(PreparationUiEffect.ToggleTheme)
             }
-            PreparationUiEvent.StartTrainingClicked -> Unit
+            PreparationUiEvent.StartTrainingClicked -> {
+                val current = _state.value
+                router.open(entry, WorkoutRoute(current.goal.goal.takeIf { current.selectedMode == PreparationMode.WithGoal }))
+            }
         }
     }
 
@@ -67,13 +68,22 @@ internal class PreparationViewModel(
         savedStateHandle[HINT_KEY] = isVisible
         _state.update { it.copy(isHowToPlacePhoneVisible = isVisible) }
     }
-}
 
-private fun goalModel(value: Int): GoalSelectorUiModel {
-    val goal = value.coerceIn(MIN_GOAL, MAX_GOAL)
-    return GoalSelectorUiModel(
-        goal = goal,
-        canDecrease = goal > MIN_GOAL,
-        canIncrease = goal < MAX_GOAL,
-    )
+    private fun goalModel(value: Int): GoalSelectorUiModel {
+        val goal = value.coerceIn(MIN_GOAL, MAX_GOAL)
+        return GoalSelectorUiModel(
+            goal = goal,
+            canDecrease = goal > MIN_GOAL,
+            canIncrease = goal < MAX_GOAL,
+        )
+    }
+
+    private companion object {
+        const val MIN_GOAL = 1
+        const val MAX_GOAL = 100
+        const val DEFAULT_GOAL = 20
+        const val MODE_KEY = "preparation.mode"
+        const val GOAL_KEY = "preparation.goal"
+        const val HINT_KEY = "preparation.hint"
+    }
 }

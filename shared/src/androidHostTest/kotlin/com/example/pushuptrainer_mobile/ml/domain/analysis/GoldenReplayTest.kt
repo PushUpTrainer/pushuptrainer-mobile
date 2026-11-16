@@ -19,6 +19,8 @@ class GoldenReplayTest {
             val expected = lines("golden/$name.expected.csv")
             assertEquals(input.size, expected.size, name)
             val counter = PushupCounter()
+            val workout = com.example.pushuptrainer_mobile.features.workout.domain.usecase.WorkoutSessionUseCase()
+            workout.ready(0)
             for (index in input.indices) {
                 val row = input[index].split(',')
                 val gold = expected[index].split(',')
@@ -27,12 +29,15 @@ class GoldenReplayTest {
                     Landmark(row[offset].toFloat(), row[offset + 1].toFloat(), row[offset + 2].toFloat(),
                         row[offset + 3].toFloat(), row[offset + 4].toFloat())
                 }
-                val state = counter.onFrame(PoseFrame(row[2].toLong(), row[3].toInt(), row[4].toInt(), points))
+                val frame = PoseFrame(row[2].toLong(), row[3].toInt(), row[4].toInt(), points)
+                val state = counter.onFrame(frame)
+                workout.onFrame(0, frame)
                 val label = "$name frame ${row[1]}"
                 assertEquals(row[1], gold[0], label)
                 assertEquals(row[2], gold[1], label)
                 assertEquals(Phase.valueOf(gold[5]), state.phase, label)
                 assertEquals(gold[6].toInt(), state.reps, label)
+                assertEquals(state, workout.state.value.analysis, label)
                 assertEquals(gold[7].takeIf { it.isNotEmpty() }?.let(Hint::valueOf), state.hint, label)
                 assertEquals(gold[9].takeIf { it.isNotEmpty() }?.split('|')?.map(TechniqueError::valueOf)?.toSet() ?: emptySet(), state.errors, label)
                 assertEquals(gold[10].toInt(), counter.snapshot.errorCounts[TechniqueError.HANDS_TOO_WIDE] ?: 0, label)
@@ -43,6 +48,9 @@ class GoldenReplayTest {
                 closeTo(gold[8], counter.snapshot.grip, label)
             }
             val summary = counter.finish()
+            val savedWorkout = workout.finish(name, null)
+            assertEquals(summary.reps, savedWorkout.repetitions, name)
+            assertEquals(summary.errorCounts.mapKeys { it.key.name }, savedWorkout.errors, name)
             val last = expected.last().split(',')
             assertEquals(last[6].toInt(), summary.reps, name)
             assertEquals(last[10].toInt(), summary.errorCounts[TechniqueError.HANDS_TOO_WIDE] ?: 0, name)

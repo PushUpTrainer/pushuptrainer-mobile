@@ -53,7 +53,7 @@ internal fun calculateHomeHistory(
 ): HomeHistory {
     val selected = minOf(selectedDate, today)
     val monday = selected.toEpochDays() - (selected.dayOfWeek.isoDayNumber - 1)
-    val byDay = workouts.groupBy {
+    val byDay = workouts.filter { it.repetitions > 0 }.groupBy {
         Instant.fromEpochMilliseconds(it.startedAtEpochMs).toLocalDateTime(zone).date
     }
     val selectedWorkouts = byDay[selected].orEmpty()

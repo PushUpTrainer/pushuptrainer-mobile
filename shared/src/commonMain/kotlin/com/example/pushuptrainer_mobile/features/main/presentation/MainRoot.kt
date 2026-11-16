@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.example.pushuptrainer_mobile.core.uikit.components.bottomNavBar.BottomNavigationBar
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.features.main.MainNavGraph
+import com.example.pushuptrainer_mobile.features.workout.WorkoutRoute
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -22,6 +23,7 @@ internal fun MainRoot(viewModel: MainViewModel = koinViewModel()) {
         MainScreen(
             state = viewModel.state(entry),
             onEvent = { viewModel.onEvent(entry, it) },
+            isWorkout = entry.destination is WorkoutRoute,
             content = display,
         )
     }
@@ -31,13 +33,14 @@ internal fun MainRoot(viewModel: MainViewModel = koinViewModel()) {
 private fun MainScreen(
     state: MainUiState,
     onEvent: (MainUiEvent) -> Unit,
+    isWorkout: Boolean,
     content: @Composable (Modifier) -> Unit,
 ) {
     Scaffold(
         containerColor = AppTheme.colors.background,
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = if (isWorkout) WindowInsets(0, 0, 0, 0) else WindowInsets.safeDrawing,
         bottomBar = {
-            BottomNavigationBar(
+            if (!isWorkout) BottomNavigationBar(
                 selected = state.selected,
                 enabledDestinations = state.available,
                 onDestinationClick = { onEvent(MainUiEvent.TabSelected(it)) },
