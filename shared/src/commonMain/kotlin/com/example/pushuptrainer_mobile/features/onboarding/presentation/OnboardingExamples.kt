@@ -1,29 +1,31 @@
 package com.example.pushuptrainer_mobile.features.onboarding.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.pushuptrainer_mobile.core.uikit.components.daySummaryCard.DaySummaryCard
 import com.example.pushuptrainer_mobile.core.uikit.components.daySummaryCard.DaySummaryUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorCard
+import com.example.pushuptrainer_mobile.core.uikit.components.goalSelectorCard.GoalSelectorUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.interfaceExample.InterfaceExample
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthCalendarCard
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthCalendarUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthDayPeriodUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard.MonthDayUiModel
+import com.example.pushuptrainer_mobile.core.uikit.components.poseIllustration.PoseIllustration
+import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwitch.PreparationMode
+import com.example.pushuptrainer_mobile.core.uikit.components.preparationModeSwitch.PreparationModeSwitch
 import com.example.pushuptrainer_mobile.core.uikit.components.statTile.StatTile
 import com.example.pushuptrainer_mobile.core.uikit.components.statTile.StatTileIconUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.statTile.StatTileUiModel
@@ -46,31 +48,37 @@ import pushuptrainermobile.shared.generated.resources.onboarding_stat_total_repe
 /*
  * Иллюстрации шагов онбординга. Это неизменный пример интерфейса приложения,
  * поэтому данные в них демонстрационные и не зависят от реальных тренировок.
+ * Компоненты UI kit обёрнуты в InterfaceExample: онбординг — это инструкция,
+ * поэтому кнопки в примерах некликабельны.
  */
 
-/**
- * Шаг 1. Место под пример экрана подготовки.
- *
- * TODO: после слияния ветки экрана подготовки заменить на PreparationModeSwitch
- *  и GoalSelectorCard из core/uikit (макет *4.1).
- */
+/** Шаг 1. Переключатель режима и карточка цели с экрана подготовки (макет *4.1). */
 @Composable
 internal fun ModesExample(modifier: Modifier = Modifier) {
-    ExamplePlaceholder(height = 286, modifier = modifier)
+    InterfaceExample(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            PreparationModeSwitch(
+                selectedMode = PreparationMode.WithGoal,
+                onModeSelect = {},
+            )
+            Spacer(Modifier.height(16.dp))
+            GoalSelectorCard(
+                model = GoalSelectorUiModel(goal = 20, canDecrease = true, canIncrease = true),
+                onDecreaseClick = {},
+                onIncreaseClick = {},
+            )
+        }
+    }
 }
 
-/**
- * Шаг 2. Иллюстрация позы и подпись.
- *
- * TODO: после слияния ветки экрана подготовки заменить заглушку на PoseIllustration (макет *4.2).
- */
+/** Шаг 2. Иллюстрация позы с экрана подготовки и подпись (макет *4.2). */
 @Composable
 internal fun PhonePlacementExample(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ExamplePlaceholder(height = 208)
+        PoseIllustration()
         Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(Res.string.onboarding_camera_caption),
@@ -84,20 +92,22 @@ internal fun PhonePlacementExample(modifier: Modifier = Modifier) {
 /** Шаг 3. Календарь месяца и итог дня (макет *4.3). */
 @Composable
 internal fun ProgressExample(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        MonthCalendarCard(
-            model = exampleMonth(title = stringResource(Res.string.onboarding_progress_month)),
-            onPreviousMonthClick = {},
-            onNextMonthClick = {},
-        )
-        Spacer(Modifier.height(16.dp))
-        DaySummaryCard(
-            model = DaySummaryUiModel(
-                dateText = stringResource(Res.string.onboarding_progress_day),
-                trainings = 1,
-                repetitions = 16,
-            ),
-        )
+    InterfaceExample(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            MonthCalendarCard(
+                model = exampleMonth(title = stringResource(Res.string.onboarding_progress_month)),
+                onPreviousMonthClick = {},
+                onNextMonthClick = {},
+            )
+            Spacer(Modifier.height(16.dp))
+            DaySummaryCard(
+                model = DaySummaryUiModel(
+                    dateText = stringResource(Res.string.onboarding_progress_day),
+                    trainings = 1,
+                    repetitions = 16,
+                ),
+            )
+        }
     }
 }
 
@@ -117,35 +127,39 @@ internal fun AppearanceExample(modifier: Modifier = Modifier) {
     val subtitleStyle = AppTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.Top) {
-            Text(
-                text = stringResource(Res.string.onboarding_appearance_screen_title),
-                style = AppTheme.typography.screenTitle,
-                color = AppTheme.colors.textPrimary,
-                modifier = Modifier.weight(1f).padding(top = 4.dp),
-            )
-            ThemeToggleButton(isDarkTheme = AppTheme.isDarkTheme, onClick = {})
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = stringResource(Res.string.onboarding_appearance_screen_subtitle),
-            style = subtitleStyle,
-            color = AppTheme.colors.textSecondary,
-        )
-        Spacer(Modifier.height(42.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ThemeColumn(
-                label = stringResource(Res.string.onboarding_appearance_dark),
-                darkTheme = true,
-                tiles = listOf(repetitions, record),
-                modifier = Modifier.weight(1f),
-            )
-            ThemeColumn(
-                label = stringResource(Res.string.onboarding_appearance_light),
-                darkTheme = false,
-                tiles = listOf(repetitions, record),
-                modifier = Modifier.weight(1f),
-            )
+        InterfaceExample(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.Top) {
+                    Text(
+                        text = stringResource(Res.string.onboarding_appearance_screen_title),
+                        style = AppTheme.typography.screenTitle,
+                        color = AppTheme.colors.textPrimary,
+                        modifier = Modifier.weight(1f).padding(top = 4.dp),
+                    )
+                    ThemeToggleButton(isDarkTheme = AppTheme.isDarkTheme, onClick = {})
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(Res.string.onboarding_appearance_screen_subtitle),
+                    style = subtitleStyle,
+                    color = AppTheme.colors.textSecondary,
+                )
+                Spacer(Modifier.height(42.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ThemeColumn(
+                        label = stringResource(Res.string.onboarding_appearance_dark),
+                        darkTheme = true,
+                        tiles = listOf(repetitions, record),
+                        modifier = Modifier.weight(1f),
+                    )
+                    ThemeColumn(
+                        label = stringResource(Res.string.onboarding_appearance_light),
+                        darkTheme = false,
+                        tiles = listOf(repetitions, record),
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
         Spacer(Modifier.height(28.dp))
         Text(
@@ -181,20 +195,6 @@ private fun ThemeColumn(
             }
         }
     }
-}
-
-@Composable
-private fun ExamplePlaceholder(
-    height: Int,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppTheme.colors.surface),
-    )
 }
 
 /** Демонстрационный октябрь 2026: сегодня 19-е, отмечены дни с тренировками. */
