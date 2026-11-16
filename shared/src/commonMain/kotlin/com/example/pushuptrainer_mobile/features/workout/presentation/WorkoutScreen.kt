@@ -47,6 +47,8 @@ import pushuptrainermobile.shared.generated.resources.workout_show_result
 import pushuptrainermobile.shared.generated.resources.workout_confirm_title
 import pushuptrainermobile.shared.generated.resources.workout_confirm_message
 import pushuptrainermobile.shared.generated.resources.workout_stay
+import pushuptrainermobile.shared.generated.resources.workout_discarded
+import pushuptrainermobile.shared.generated.resources.workout_return_preparation
 
 @Composable
 fun WorkoutScreen(
@@ -79,6 +81,7 @@ fun WorkoutScreen(
                         WorkoutStatus.Saving -> Res.string.workout_saving
                         WorkoutStatus.SaveError -> Res.string.workout_save_error
                         WorkoutStatus.Saved -> Res.string.workout_saved
+                        WorkoutStatus.Discarded -> Res.string.workout_discarded
                         WorkoutStatus.Running -> null
                     }
                     statusText?.let {
@@ -101,13 +104,13 @@ fun WorkoutScreen(
                             text = stringResource(Res.string.workout_retry),
                             onClick = { onEvent(WorkoutUiEvent.RetrySaveClicked) },
                         )
-                        WorkoutStatus.Saved -> AppPrimaryButton(
-                            text = stringResource(Res.string.workout_show_result),
+                        WorkoutStatus.Discarded, WorkoutStatus.Saved -> AppPrimaryButton(
+                            text = stringResource(if (state.status == WorkoutStatus.Discarded) Res.string.workout_return_preparation else Res.string.workout_show_result),
                             onClick = { onEvent(WorkoutUiEvent.ShowResultClicked) },
                         )
                         else -> Unit
                     }
-                    if (state.status !in setOf(WorkoutStatus.Saving, WorkoutStatus.SaveError, WorkoutStatus.Saved)) AppPrimaryButton(
+                    if (state.status !in setOf(WorkoutStatus.Saving, WorkoutStatus.SaveError, WorkoutStatus.Saved, WorkoutStatus.Discarded)) AppPrimaryButton(
                         text = stringResource(
                             if (state.mode is WorkoutModeUiModel.Goal) Res.string.workout_finish_early
                             else Res.string.workout_finish,

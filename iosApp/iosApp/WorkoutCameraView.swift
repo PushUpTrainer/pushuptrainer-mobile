@@ -26,7 +26,16 @@ final class WorkoutCameraView: UIView, IosWorkoutCamera {
 
     func start(listener_ listener: WorkoutCameraListener) {
         camera.setErrorListener { _ in listener.onError() }
-        camera.setReadyListener { listener.onReady() }
+        camera.setReadyListener { [weak self] in
+            if let connection = self?.preview.connection {
+                if connection.isVideoOrientationSupported { connection.videoOrientation = .portrait }
+                if connection.isVideoMirroringSupported {
+                    connection.automaticallyAdjustsVideoMirroring = false
+                    connection.isVideoMirrored = true
+                }
+            }
+            listener.onReady()
+        }
         camera.start(listener: listener)
     }
 

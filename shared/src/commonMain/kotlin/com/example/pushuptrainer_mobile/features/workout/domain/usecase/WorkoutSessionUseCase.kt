@@ -46,9 +46,9 @@ internal class WorkoutSessionUseCase(
         _state.value = _state.value.copy(phase = WorkoutPhase.Running)
     }
 
-    fun onFrame(generation: Int, frame: PoseFrame) {
-        if (_state.value.generation != generation || _state.value.phase != WorkoutPhase.Running) return
-        if (lastTimestamp?.let { frame.timestampMs <= it } == true) return
+    fun onFrame(generation: Int, frame: PoseFrame): Boolean {
+        if (_state.value.generation != generation || _state.value.phase != WorkoutPhase.Running) return false
+        if (lastTimestamp?.let { frame.timestampMs <= it } == true) return false
         lastTimestamp = frame.timestampMs
         val result = analyzer.onFrame(frame)
         val total = repetitions + result.reps
@@ -57,6 +57,7 @@ internal class WorkoutSessionUseCase(
             stopSegment()
             _state.value = _state.value.copy(phase = WorkoutPhase.Finished)
         }
+        return true
     }
 
     fun cameraFailed(generation: Int) {

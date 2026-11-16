@@ -5,6 +5,8 @@ import android.graphics.Matrix
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import androidx.camera.core.UseCaseGroup
+import androidx.core.view.doOnLayout
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -81,8 +83,20 @@ class AndroidPoseSource(
                     current.preview = preview
                     current.analysis = analysis
                     analysis.setAnalyzer(current.executor) { image -> analyze(image, current) }
-                    provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis)
-                    if (session === current) onReady()
+                    previewView.doOnLayout {
+                        if (session === current) {
+                            try {
+                                val group = UseCaseGroup.Builder()
+                                    .addUseCase(preview).addUseCase(analysis)
+                                    .setViewPort(requireNotNull(previewView.viewPort)).build()
+                                provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, group)
+                                onReady()
+                            } catch (error: Exception) {
+                                stop()
+                                onError(error.message ?: "Камера недоступна")
+                            }
+                        }
+                    }
                 } catch (error: Exception) {
                     stop()
                     onError(error.message ?: "Камера недоступна")
@@ -97,9 +111,9 @@ class AndroidPoseSource(
     private fun analyze(image: ImageProxy, current: Session) {
         try {
             if (session !== current) return
-            val bitmap = Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
-            image.planes[0].buffer.rewind()
-            bitmap.copyPixelsFromBuffer(image.planes[0].buffer)
+            val buffer = image.toBitmap()
+            val crop = image.cropRect
+            val bitmap = Bitmap.createBitmap(buffer, crop.left, crop.top, crop.width(), crop.height())
             val rotation = image.imageInfo.rotationDegrees
             val upright = if (rotation == 0) bitmap else Bitmap.createBitmap(
                 bitmap, 0, 0, bitmap.width, bitmap.height,

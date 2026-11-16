@@ -70,6 +70,19 @@ class HomeHistoryTest {
         assertEquals(12, future.repetitions)
     }
 
+    @Test
+    fun emptyWorkoutsDoNotContributeToHistoryOrStreak() {
+        val history = calculateHomeHistory(
+            listOf(workout(sunday, 0), workout(monday, 0), workout(saturday, 5)),
+            monday,
+            zone,
+        )
+        assertEquals(0, history.workouts)
+        assertEquals(0, history.repetitions)
+        assertEquals(0, history.streakDays)
+        assertEquals(setOf(saturday), history.workoutDays)
+    }
+
     private fun workout(day: LocalDate, repetitions: Int) =
         HomeWorkout(day.atStartOfDayIn(zone).toEpochMilliseconds(), repetitions)
 }

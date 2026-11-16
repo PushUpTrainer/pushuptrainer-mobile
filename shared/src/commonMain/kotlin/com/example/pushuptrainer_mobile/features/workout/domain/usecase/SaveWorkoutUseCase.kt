@@ -4,5 +4,9 @@ import com.example.pushuptrainer_mobile.features.workout.domain.model.CompletedW
 import com.example.pushuptrainer_mobile.features.workout.domain.repository.WorkoutRepository
 
 internal class SaveWorkoutUseCase(private val repository: WorkoutRepository) {
-    suspend operator fun invoke(workout: CompletedWorkout) = repository.save(workout)
+    suspend operator fun invoke(workout: CompletedWorkout): Boolean {
+        if (workout.repetitions <= 0) return false
+        repository.save(workout)
+        return true
+    }
 }

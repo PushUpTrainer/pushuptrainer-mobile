@@ -177,6 +177,33 @@ abstract class WorkoutViewModelTest {
         }
     }
 
+    @Test
+    fun emptyWorkoutFinishesWithoutSavingOrOpeningResult() = runTest {
+        for (goal in listOf(null, 20)) fixture(goal) {
+            vm.cameraListener(0).onReady()
+            repeat(3) { vm.onEvent(WorkoutUiEvent.FinishClicked) }
+            runCurrent()
+            assertEquals(0, repository.attempts)
+            assertEquals(WorkoutStatus.Discarded, vm.state.value.status)
+            assertEquals(PreparationRoute, (stack.last() as NavigationEntry).destination)
+        }
+    }
+
+    @Test
+    fun emptyWorkoutConfirmedInBackgroundReturnsOnForeground() = runTest {
+        fixture {
+            vm.onEvent(WorkoutUiEvent.BackClicked)
+            active = false
+            vm.onEvent(WorkoutUiEvent.ConfirmFinishClicked)
+            runCurrent()
+            assertEquals(0, repository.attempts)
+            assertEquals(entry, stack.last())
+            active = true
+            vm.onForeground()
+            assertEquals(PreparationRoute, (stack.last() as NavigationEntry).destination)
+        }
+    }
+
     private suspend fun TestScope.fixture(goal: Int? = null, body: suspend Fixture.() -> Unit) {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val fixture = Fixture(goal)

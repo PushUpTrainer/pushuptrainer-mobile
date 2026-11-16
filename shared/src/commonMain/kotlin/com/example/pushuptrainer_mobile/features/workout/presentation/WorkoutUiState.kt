@@ -20,4 +20,4 @@ data class WorkoutUiState(
         }
 }
 
-enum class WorkoutStatus { Starting, Running, Paused, CameraError, Saving, SaveError, Saved }
+enum class WorkoutStatus { Starting, Running, Paused, CameraError, Saving, SaveError, Saved, Discarded }

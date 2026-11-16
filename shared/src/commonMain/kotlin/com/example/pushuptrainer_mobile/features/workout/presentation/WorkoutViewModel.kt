@@ -5,11 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pushuptrainer_mobile.core.navigation.NavigationEntry
 import com.example.pushuptrainer_mobile.core.navigation.Router
+import com.example.pushuptrainer_mobile.features.preparation.PreparationRoute
 import com.example.pushuptrainer_mobile.features.trainingresult.TrainingResultRoute
 import com.example.pushuptrainer_mobile.features.workout.domain.model.CompletedWorkout
 import com.example.pushuptrainer_mobile.features.workout.domain.model.WorkoutPhase
 import com.example.pushuptrainer_mobile.features.workout.domain.usecase.SaveWorkoutUseCase
 import com.example.pushuptrainer_mobile.features.workout.domain.usecase.WorkoutSessionUseCase
+import com.example.pushuptrainer_mobile.core.uikit.components.poseOverlay.PoseOverlayUiModel
+import com.example.pushuptrainer_mobile.ml.presentation.toOverlay
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
 import com.example.pushuptrainer_mobile.ml.presentation.WorkoutCameraListener
 import kotlinx.coroutines.CancellationException
@@ -36,6 +39,8 @@ internal class WorkoutViewModel(
         status = WorkoutStatus.Starting,
     ))
     val state = _state.asStateFlow()
+    private val _overlay = MutableStateFlow<PoseOverlayUiModel?>(null)
+    val overlay = _overlay.asStateFlow()
     private var pending: CompletedWorkout? = null
 
     init {
@@ -47,7 +52,7 @@ internal class WorkoutViewModel(
         }
         viewModelScope.launch {
             session.state.collect { value ->
-                if (_state.value.status !in setOf(WorkoutStatus.Saving, WorkoutStatus.SaveError, WorkoutStatus.Saved)) {
+                if (_state.value.status !in setOf(WorkoutStatus.Saving, WorkoutStatus.SaveError, WorkoutStatus.Saved, WorkoutStatus.Discarded)) {
                     val rendered = _state.value.withSession(value)
                     _state.update { current ->
                         if (pending == null && session.state.value == value) {
@@ -60,6 +65,7 @@ internal class WorkoutViewModel(
                         } else current
                     }
                 }
+                if (value.phase != WorkoutPhase.Running) _overlay.value = null
                 checkpoint()
                 if (value.phase == WorkoutPhase.Finished && pending == null) finish()
             }
@@ -87,7 +93,11 @@ internal class WorkoutViewModel(
     fun cameraListener(generation: Int): WorkoutCameraListener = object : WorkoutCameraListener {
         override fun onReady() = session.ready(generation)
         override fun onError() = session.cameraFailed(generation)
-        override fun onFrame(frame: PoseFrame) = session.onFrame(generation, frame)
+        override fun onFrame(frame: PoseFrame) {
+            if (session.state.value.generation != generation || session.state.value.phase != WorkoutPhase.Running) return
+            if (!session.onFrame(generation, frame)) return
+            _overlay.value = if (session.state.value.phase == WorkoutPhase.Running) frame.toOverlay() else null
+        }
     }
 
     fun onBackground() {
@@ -96,7 +106,7 @@ internal class WorkoutViewModel(
     }
 
     fun onForeground() {
-        if (_state.value.status == WorkoutStatus.Saved) showResult()
+        showResult()
     }
 
     override fun onCleared() {
@@ -118,12 +128,12 @@ internal class WorkoutViewModel(
 
     private fun save() {
         val result = pending ?: return
-        if (_state.value.status == WorkoutStatus.Saving || _state.value.status == WorkoutStatus.Saved) return
+        if (_state.value.status in setOf(WorkoutStatus.Saving, WorkoutStatus.Saved, WorkoutStatus.Discarded)) return
         _state.update { it.copy(status = WorkoutStatus.Saving, repetitions = result.repetitions.toString()) }
         viewModelScope.launch {
             try {
-                saveWorkout(result)
-                _state.update { it.copy(status = WorkoutStatus.Saved) }
+                val saved = saveWorkout(result)
+                _state.update { it.copy(status = if (saved) WorkoutStatus.Saved else WorkoutStatus.Discarded) }
                 showResult()
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -134,7 +144,11 @@ internal class WorkoutViewModel(
     }
 
     private fun showResult() {
-        if (_state.value.status == WorkoutStatus.Saved) router.replace(entry, TrainingResultRoute(entry.id))
+        when (_state.value.status) {
+            WorkoutStatus.Saved -> router.replace(entry, TrainingResultRoute(entry.id))
+            WorkoutStatus.Discarded -> router.returnTo(entry, PreparationRoute)
+            else -> Unit
+        }
     }
 
     private companion object {

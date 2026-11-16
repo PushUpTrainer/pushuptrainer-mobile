@@ -14,7 +14,7 @@
     <string name="workout_saved">Результат сохранён</string>
     <string name="workout_show_result">Показать результат</string>
     <string name="workout_confirm_title">Завершить тренировку?</string>
-    <string name="workout_confirm_message">Текущий результат будет сохранён.</string>
+    <string name="workout_confirm_message">Результат будет сохранён, если выполнено хотя бы одно повторение.</string>
     <string name="workout_stay">Остаться</string>
     <string name="workout_no_person_title">Встаньте в кадр</string>
     <string name="workout_no_person_body">Камера должна видеть голову, руки и торс</string>
@@ -28,4 +28,6 @@
     <string name="workout_wide_body">Поставьте ладони ближе друг к другу</string>
     <string name="workout_narrow_title">Руки слишком узко</string>
     <string name="workout_narrow_body">Поставьте ладони немного шире</string>
+    <string name="workout_discarded">Тренировка без повторений не сохранена</string>
+    <string name="workout_return_preparation">К подготовке</string>
 </resources>

@@ -1,5 +1,8 @@
 package com.example.pushuptrainer_mobile.features.workout.presentation
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import com.example.pushuptrainer_mobile.core.uikit.components.poseOverlay.PoseOverlay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +51,10 @@ internal fun WorkoutRoot(
     val camera = LocalWorkoutCamera.current
     val listener = remember(viewModel, state.cameraGeneration) { viewModel.cameraListener(state.cameraGeneration) }
     WorkoutScreen(state = state, onEvent = viewModel::onEvent) {
-        if (state.status == WorkoutStatus.Starting || state.status == WorkoutStatus.Running) camera(listener)
+        if (state.status == WorkoutStatus.Starting || state.status == WorkoutStatus.Running) {
+            camera(listener)
+            val overlay by viewModel.overlay.collectAsStateWithLifecycle()
+            overlay?.let { PoseOverlay(it, Modifier.fillMaxSize()) }
+        }
     }
 }
