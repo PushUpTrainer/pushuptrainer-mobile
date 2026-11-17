@@ -1,5 +1,6 @@
 package com.example.pushuptrainer_mobile.features.workout
 
+import com.example.pushuptrainer_mobile.ml.domain.model.Landmark
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
@@ -22,6 +23,7 @@ import org.koin.dsl.koinApplication
 import org.koin.dsl.module
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
@@ -33,10 +35,71 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.TestScope
 
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class WorkoutViewModelTest {
+    @Test
+    fun hiddenCooldownRejectsSetupFramesBeforeStarting() = runTest {
+        fixture(goal = 1) {
+            val listener = vm.cameraListener(0)
+            listener.onReady()
+            runCurrent()
+            assertEquals(WorkoutStatus.Running, vm.state.value.status)
+            for (remaining in 4 downTo 1) {
+                listener.onFrame(frame((5 - remaining).toLong()).copy(landmarks = List(12) { Landmark(0.5f, 0.5f, 0f, 1f, 1f) }))
+                assertNull(vm.overlay.value)
+                advanceTimeBy(1000)
+                runCurrent()
+                assertEquals("0", vm.state.value.repetitions)
+                assertEquals(0, repository.attempts)
+            }
+            listener.onReady()
+            advanceTimeBy(999)
+            runCurrent()
+            listener.onFrame(frame(10))
+            assertEquals(WorkoutStatus.Running, vm.state.value.status)
+            advanceTimeBy(1)
+            runCurrent()
+            assertEquals(WorkoutStatus.Running, vm.state.value.status)
+            listener.onFrame(frame(11))
+            runCurrent()
+            assertEquals(1, repository.saved.single().repetitions)
+            assertEquals(0L, repository.saved.single().durationMs)
+        }
+    }
+
+    @Test
+    fun backgroundRestartsCooldownAndOldCallbacksCannotAffectIt() = runTest {
+        fixture {
+            val old = vm.cameraListener(0)
+            old.onReady()
+            advanceTimeBy(2000)
+            runCurrent()
+            vm.onBackground()
+            advanceTimeBy(10000)
+            runCurrent()
+            assertEquals(WorkoutStatus.Paused, vm.state.value.status)
+            vm.onEvent(WorkoutUiEvent.ResumeClicked)
+            val current = vm.cameraListener(1)
+            current.onReady()
+            old.onReady()
+            old.onError()
+            old.onFrame(frame(1))
+            runCurrent()
+            advanceTimeBy(4999)
+            runCurrent()
+            current.onFrame(frame(2))
+            vm.onEvent(WorkoutUiEvent.FinishClicked)
+            advanceTimeBy(10000)
+            runCurrent()
+            assertEquals(WorkoutStatus.Discarded, vm.state.value.status)
+            assertEquals(0, repository.attempts)
+        }
+    }
+
     @Test
     fun sharedGraphCreatesIndependentGoalAndFreeWorkoutEntries() = runTest {
         fixture {
@@ -68,6 +131,8 @@ abstract class WorkoutViewModelTest {
     fun unfinishedSnapshotRestoresPausedAndContinuesWithoutLosingReps() = runTest {
         fixture {
             vm.cameraListener(0).onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             vm.cameraListener(0).onFrame(frame(1))
             vm.onBackground()
             runCurrent()
@@ -78,6 +143,8 @@ abstract class WorkoutViewModelTest {
                 assertEquals("1", restored.state.value.repetitions)
                 restored.onEvent(WorkoutUiEvent.ResumeClicked)
                 restored.cameraListener(1).onReady()
+                advanceTimeBy(5000)
+                runCurrent()
                 restored.cameraListener(1).onFrame(frame(2))
                 restored.onEvent(WorkoutUiEvent.FinishClicked)
                 runCurrent()
@@ -93,6 +160,8 @@ abstract class WorkoutViewModelTest {
         fixture(goal = 2) {
             val listener = vm.cameraListener(0)
             listener.onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             repeat(5) { listener.onFrame(frame(it.toLong())) }
             repeat(3) { vm.onEvent(WorkoutUiEvent.FinishClicked) }
             runCurrent()
@@ -113,6 +182,8 @@ abstract class WorkoutViewModelTest {
         fixture {
             repository.fail = true
             vm.cameraListener(0).onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             vm.cameraListener(0).onFrame(frame(1))
             vm.onEvent(WorkoutUiEvent.FinishClicked)
             runCurrent()
@@ -135,6 +206,8 @@ abstract class WorkoutViewModelTest {
     fun backPausesAndDismissKeepsResultWithoutSaving() = runTest {
         fixture {
             vm.cameraListener(0).onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             vm.cameraListener(0).onFrame(frame(1))
             runCurrent()
             vm.onEvent(WorkoutUiEvent.BackClicked)
@@ -148,6 +221,8 @@ abstract class WorkoutViewModelTest {
             vm.onEvent(WorkoutUiEvent.ResumeClicked)
             runCurrent()
             vm.cameraListener(1).onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             vm.cameraListener(0).onFrame(frame(2))
             vm.cameraListener(1).onFrame(frame(3))
             runCurrent()
@@ -160,6 +235,8 @@ abstract class WorkoutViewModelTest {
         fixture {
             repository.gate = CompletableDeferred()
             vm.cameraListener(0).onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             vm.cameraListener(0).onFrame(frame(1))
             vm.onEvent(WorkoutUiEvent.FinishClicked)
             runCurrent()
@@ -181,6 +258,8 @@ abstract class WorkoutViewModelTest {
     fun emptyWorkoutFinishesWithoutSavingOrOpeningResult() = runTest {
         for (goal in listOf(null, 20)) fixture(goal) {
             vm.cameraListener(0).onReady()
+            advanceTimeBy(5000)
+            runCurrent()
             repeat(3) { vm.onEvent(WorkoutUiEvent.FinishClicked) }
             runCurrent()
             assertEquals(0, repository.attempts)
@@ -206,7 +285,7 @@ abstract class WorkoutViewModelTest {
 
     private suspend fun TestScope.fixture(goal: Int? = null, body: suspend Fixture.() -> Unit) {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-        val fixture = Fixture(goal)
+        val fixture = Fixture(goal, testScheduler)
         try {
             runCurrent()
             fixture.body()
@@ -216,7 +295,7 @@ abstract class WorkoutViewModelTest {
         }
     }
 
-    private class Fixture(val goal: Int?) {
+    private class Fixture(val goal: Int?, val scheduler: TestCoroutineScheduler) {
         val entry = WorkoutRoute(goal).newEntry()
         val stack = mutableListOf<NavKey>(HomeRoute.newEntry(), PreparationRoute.newEntry(), entry)
         var active = true
@@ -226,7 +305,7 @@ abstract class WorkoutViewModelTest {
         val vm = createViewModel(handle)
         fun createViewModel(handle: SavedStateHandle) = WorkoutViewModel(
             entry, goal, handle, router,
-            WorkoutSessionUseCase(goal = goal, analyzerFactory = { CountingAnalyzer() }),
+            WorkoutSessionUseCase(goal = goal, analyzerFactory = { CountingAnalyzer() }, timeSource = scheduler.timeSource),
             SaveWorkoutUseCase(repository),
         )
     }

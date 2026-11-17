@@ -6,12 +6,14 @@ import com.example.pushuptrainer_mobile.features.workout.domain.model.WorkoutSes
 import com.example.pushuptrainer_mobile.ml.domain.analysis.PushupCounter
 import com.example.pushuptrainer_mobile.ml.domain.model.Phase
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrameGate
 import com.example.pushuptrainer_mobile.ml.domain.model.PushupAnalyzer
 import com.example.pushuptrainer_mobile.ml.domain.model.PushupState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.time.Clock
 import kotlin.time.TimeSource
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class WorkoutSessionUseCase(
     private val goal: Int? = null,
@@ -42,7 +44,7 @@ internal class WorkoutSessionUseCase(
 
     fun ready(generation: Int) {
         if (_state.value.generation != generation || _state.value.phase != WorkoutPhase.Starting) return
-        activeSince = timeSource.markNow()
+        activeSince = timeSource.markNow() + PoseFrameGate.PREPARATION_DURATION_MS.milliseconds
         _state.value = _state.value.copy(phase = WorkoutPhase.Running)
     }
 
@@ -50,6 +52,7 @@ internal class WorkoutSessionUseCase(
         if (_state.value.generation != generation || _state.value.phase != WorkoutPhase.Running) return false
         if (lastTimestamp?.let { frame.timestampMs <= it } == true) return false
         lastTimestamp = frame.timestampMs
+        if (activeSince?.hasPassedNow() != true) return false
         val result = analyzer.onFrame(frame)
         val total = repetitions + result.reps
         _state.value = _state.value.copy(analysis = result.copy(reps = total))
@@ -94,7 +97,7 @@ internal class WorkoutSessionUseCase(
         return CompletedWorkout(
             id = id,
             startedAtEpochMs = startedAt,
-            durationMs = durationMs + (activeSince?.elapsedNow()?.inWholeMilliseconds ?: 0L),
+            durationMs = durationMs + (activeSince?.elapsedNow()?.inWholeMilliseconds?.coerceAtLeast(0L) ?: 0L),
             repetitions = repetitions + summary.reps,
             goal = goal,
             errors = mergeErrors(summary.errorCounts.mapKeys { it.key.name }),
@@ -105,7 +108,7 @@ internal class WorkoutSessionUseCase(
         val summary = analyzer.finish()
         repetitions += summary.reps
         errors = mergeErrors(summary.errorCounts.mapKeys { it.key.name })
-        durationMs += activeSince?.elapsedNow()?.inWholeMilliseconds ?: 0L
+        durationMs += activeSince?.elapsedNow()?.inWholeMilliseconds?.coerceAtLeast(0L) ?: 0L
         activeSince = null
         analyzer = analyzerFactory()
         lastTimestamp = null

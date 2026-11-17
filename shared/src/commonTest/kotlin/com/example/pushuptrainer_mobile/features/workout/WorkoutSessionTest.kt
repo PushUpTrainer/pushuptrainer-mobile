@@ -5,6 +5,7 @@ import com.example.pushuptrainer_mobile.features.workout.domain.usecase.WorkoutS
 import com.example.pushuptrainer_mobile.ml.domain.model.Hint
 import com.example.pushuptrainer_mobile.ml.domain.model.Phase
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrameGate
 import com.example.pushuptrainer_mobile.ml.domain.model.PushupAnalyzer
 import com.example.pushuptrainer_mobile.ml.domain.model.PushupState
 import com.example.pushuptrainer_mobile.ml.domain.model.TechniqueError
@@ -12,15 +13,95 @@ import com.example.pushuptrainer_mobile.ml.domain.model.WorkoutSummary
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.test.assertFalse
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TestTimeSource
 import kotlin.time.Duration.Companion.seconds
 
 class WorkoutSessionTest {
     @Test
+    fun modelAndCounterShareOneFiveSecondPreparationWindow() {
+        val clock = TestTimeSource()
+        val session = WorkoutSessionUseCase(analyzerFactory = { CountingAnalyzer() }, timeSource = clock)
+        val gate = PoseFrameGate(0L)
+        var detectionCalls = 0
+        fun cameraFrame(capturedAt: Long, deliveredAt: Long) {
+            if (gate.allows(capturedAt, deliveredAt)) {
+                detectionCalls++
+                session.onFrame(0, frame(capturedAt / 1_000_000L))
+            }
+        }
+        session.ready(0)
+        clock += 4999.milliseconds
+        cameraFrame(4_999_000_000L, 4_999_000_000L)
+        assertEquals(0, detectionCalls)
+        clock += 1.milliseconds
+        cameraFrame(4_999_000_000L, 5_000_000_000L)
+        assertEquals(0, detectionCalls)
+        cameraFrame(5_000_000_000L, 5_000_000_000L)
+        assertEquals(1, detectionCalls)
+        assertEquals(1, session.snapshot("first", null).repetitions)
+        assertEquals(0L, session.snapshot("first", null).durationMs)
+        clock += 1.seconds
+        assertEquals(1000L, session.finish("first", null).durationMs)
+    }
+
+    @Test
+    fun preparationIgnoresFramesErrorsAndDurationUntilFiveSeconds() {
+        for (goal in listOf(null, 1)) {
+            val clock = TestTimeSource()
+            val session = WorkoutSessionUseCase(goal, { CountingAnalyzer() }, timeSource = clock)
+            session.ready(0)
+            assertFalse(session.onFrame(0, frame(1)))
+            clock += 4999.milliseconds
+            assertEquals(WorkoutPhase.Running, session.state.value.phase)
+            session.ready(0)
+            assertFalse(session.onFrame(0, frame(2)))
+            val preparing = session.snapshot("test", goal)
+            assertEquals(0, preparing.repetitions)
+            assertEquals(0L, preparing.durationMs)
+            assertTrue(preparing.errors.isEmpty())
+            clock += 1.milliseconds
+            assertEquals(WorkoutPhase.Running, session.state.value.phase)
+            assertFalse(session.onFrame(0, frame(2)))
+            session.onFrame(0, frame(3))
+            assertEquals(1, session.state.value.analysis?.reps)
+        }
+    }
+
+    @Test
+    fun pausedOrFailedSessionCannotCountAndResumeGetsFullCooldown() {
+        val clock = TestTimeSource()
+        val session = WorkoutSessionUseCase(analyzerFactory = { CountingAnalyzer() }, timeSource = clock)
+        session.ready(0)
+        clock += 3.seconds
+        session.pause()
+        clock += 10.seconds
+        assertEquals(WorkoutPhase.Paused, session.state.value.phase)
+        session.resume()
+        session.ready(1)
+        session.onFrame(1, frame(2))
+        assertEquals(0, session.snapshot("resumed", null).repetitions)
+        session.cameraFailed(1)
+        clock += 5.seconds
+        assertEquals(WorkoutPhase.CameraError, session.state.value.phase)
+        session.resume()
+        session.ready(2)
+        session.onFrame(2, frame(1))
+        val result = session.finish("empty", null)
+        clock += 5.seconds
+        assertEquals(WorkoutPhase.Finished, session.state.value.phase)
+        assertEquals(0, result.repetitions)
+        assertEquals(0L, result.durationMs)
+    }
+
+    @Test
     fun pausePreservesCompletedRepsAndExcludesBackgroundDuration() {
         val clock = TestTimeSource()
         val session = WorkoutSessionUseCase(analyzerFactory = { CountingAnalyzer() }, nowMillis = { 1234L }, timeSource = clock)
         session.ready(0)
+        clock += 5.seconds
         session.onFrame(0, frame(1))
         clock += 3.seconds
         session.pause()
@@ -30,6 +111,7 @@ class WorkoutSessionTest {
         session.ready(0)
         assertEquals(WorkoutPhase.Starting, session.state.value.phase)
         session.ready(1)
+        clock += 5.seconds
         session.onFrame(0, frame(3))
         session.onFrame(1, frame(1))
         session.onFrame(1, frame(1))
@@ -45,8 +127,10 @@ class WorkoutSessionTest {
 
     @Test
     fun goalFreezesAtTargetBeforeAnyLateFrame() {
-        val session = WorkoutSessionUseCase(goal = 2, analyzerFactory = { CountingAnalyzer() })
+        val clock = TestTimeSource()
+        val session = WorkoutSessionUseCase(goal = 2, analyzerFactory = { CountingAnalyzer() }, timeSource = clock)
         session.ready(0)
+        clock += 5.seconds
         repeat(10) { session.onFrame(0, frame(it.toLong())) }
         assertEquals(WorkoutPhase.Finished, session.state.value.phase)
         assertEquals(2, session.finish("one", 2).repetitions)
@@ -54,8 +138,10 @@ class WorkoutSessionTest {
 
     @Test
     fun realCounterReportsMissingPersonWithoutCounting() {
-        val session = WorkoutSessionUseCase()
+        val clock = TestTimeSource()
+        val session = WorkoutSessionUseCase(timeSource = clock)
         session.ready(0)
+        clock += 5.seconds
         session.onFrame(0, frame(1))
         assertEquals(Hint.NO_PERSON, session.state.value.analysis?.hint)
         assertEquals(0, session.finish("missing", null).repetitions)
@@ -63,11 +149,13 @@ class WorkoutSessionTest {
 
     @Test
     fun cameraFailureCanRetryAndOldCallbacksCannotAffectNewAttempt() {
-        val session = WorkoutSessionUseCase(analyzerFactory = { CountingAnalyzer() })
+        val clock = TestTimeSource()
+        val session = WorkoutSessionUseCase(analyzerFactory = { CountingAnalyzer() }, timeSource = clock)
         session.cameraFailed(0)
         assertEquals(WorkoutPhase.CameraError, session.state.value.phase)
         session.resume()
         session.ready(1)
+        clock += 5.seconds
         session.cameraFailed(0)
         session.onFrame(0, frame(1))
         assertNull(session.state.value.analysis)

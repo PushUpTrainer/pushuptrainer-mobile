@@ -2,6 +2,10 @@ package com.example.pushuptrainer_mobile.ml.data.mediapipe
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.hardware.camera2.CameraCharacteristics
+import android.os.SystemClock
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -15,6 +19,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.example.pushuptrainer_mobile.ml.domain.model.BodyPoint
 import com.example.pushuptrainer_mobile.ml.domain.model.Landmark
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrameGate
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseListener
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseSource
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -23,6 +28,7 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import java.util.concurrent.Executors
 
+@OptIn(ExperimentalCamera2Interop::class)
 class AndroidPoseSource(
     private val owner: LifecycleOwner,
     private val previewView: PreviewView,
@@ -40,6 +46,11 @@ class AndroidPoseSource(
         var analysis: ImageAnalysis? = null
         var landmarker: PoseLandmarker? = null
         var lastInputTimestamp = 0L
+        var frameGate: PoseFrameGate? = null
+        var usesRealtimeTimestamps = false
+        var preparationStreamReplaced = false
+        var replacementRequested = false
+        var readyRequested = false
     }
 
     override fun start(listener: PoseListener) {
@@ -76,21 +87,21 @@ class AndroidPoseSource(
                     val provider = future.get()
                     current.cameraProvider = provider
                     val preview = Preview.Builder().build().also { it.surfaceProvider = previewView.surfaceProvider }
-                    val analysis = ImageAnalysis.Builder()
-                        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build()
+                    val analysis = createAnalysis(current)
                     current.preview = preview
                     current.analysis = analysis
-                    analysis.setAnalyzer(current.executor) { image -> analyze(image, current) }
                     previewView.doOnLayout {
                         if (session === current) {
                             try {
                                 val group = UseCaseGroup.Builder()
                                     .addUseCase(preview).addUseCase(analysis)
                                     .setViewPort(requireNotNull(previewView.viewPort)).build()
-                                provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, group)
-                                onReady()
+                                val camera = provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, group)
+                                val timestampSource = Camera2CameraInfo.from(camera.cameraInfo)
+                                    .getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE)
+                                synchronized(current) {
+                                    current.usesRealtimeTimestamps = timestampSource == CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME
+                                }
                             } catch (error: Exception) {
                                 stop()
                                 onError(error.message ?: "Камера недоступна")
@@ -108,9 +119,66 @@ class AndroidPoseSource(
         }
     }
 
-    private fun analyze(image: ImageProxy, current: Session) {
+    private fun createAnalysis(current: Session): ImageAnalysis {
+        val analysis = ImageAnalysis.Builder()
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+        analysis.setAnalyzer(current.executor) { image -> analyze(image, current, analysis) }
+        return analysis
+    }
+
+    private fun replacePreparationStream(current: Session, previous: ImageAnalysis) {
+        if (session !== current || current.analysis !== previous) return
         try {
-            if (session !== current) return
+            val provider = requireNotNull(current.cameraProvider)
+            previous.clearAnalyzer()
+            provider.unbind(previous)
+            val analysis = createAnalysis(current)
+            synchronized(current) {
+                current.analysis = analysis
+                current.preparationStreamReplaced = true
+            }
+            val group = UseCaseGroup.Builder()
+                .addUseCase(requireNotNull(current.preview)).addUseCase(analysis)
+                .setViewPort(requireNotNull(previewView.viewPort)).build()
+            provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, group)
+        } catch (error: Exception) {
+            stop()
+            onError(error.message ?: "Камера недоступна")
+        }
+    }
+
+    private fun analyze(image: ImageProxy, current: Session, source: ImageAnalysis) {
+        try {
+            synchronized(current) {
+                if (session !== current || current.analysis !== source) return
+                val now = SystemClock.elapsedRealtimeNanos()
+                val gate = current.frameGate
+                if (gate == null) {
+                    if (!current.readyRequested) {
+                        current.readyRequested = true
+                        mainExecutor.execute {
+                            synchronized(current) {
+                                if (session === current && current.analysis === source) {
+                                    current.frameGate = PoseFrameGate(SystemClock.elapsedRealtimeNanos())
+                                    onReady()
+                                }
+                            }
+                        }
+                    }
+                    return
+                }
+                if (current.usesRealtimeTimestamps) {
+                    if (!gate.allows(image.imageInfo.timestamp, now)) return
+                } else if (!current.preparationStreamReplaced) {
+                    if (gate.allows(now, now) && !current.replacementRequested) {
+                        current.replacementRequested = true
+                        mainExecutor.execute { replacePreparationStream(current, source) }
+                    }
+                    return
+                }
+            }
             val buffer = image.toBitmap()
             val crop = image.cropRect
             val bitmap = Bitmap.createBitmap(buffer, crop.left, crop.top, crop.width(), crop.height())
@@ -121,7 +189,9 @@ class AndroidPoseSource(
             )
             val timestamp = maxOf(image.imageInfo.timestamp / 1_000_000, current.lastInputTimestamp + 1)
             current.lastInputTimestamp = timestamp
-            if (session === current) current.landmarker?.detectAsync(BitmapImageBuilder(upright).build(), timestamp)
+            synchronized(current) {
+                if (session === current && current.analysis === source) current.landmarker?.detectAsync(BitmapImageBuilder(upright).build(), timestamp)
+            }
         } catch (error: Exception) {
             mainExecutor.execute { if (session === current) onError(error.message ?: "Ошибка обработки кадра") }
         } finally {
@@ -131,7 +201,10 @@ class AndroidPoseSource(
 
     override fun stop() {
         val current = session ?: return
-        session = null
+        synchronized(current) {
+            session = null
+            current.frameGate = null
+        }
         try {
             current.analysis?.clearAnalyzer()
             val useCases = listOfNotNull(current.preview, current.analysis).toTypedArray()

@@ -5,6 +5,8 @@ import com.example.pushuptrainer_mobile.ml.domain.model.Landmark
 import com.example.pushuptrainer_mobile.ml.domain.model.Phase
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
 import com.example.pushuptrainer_mobile.ml.domain.model.TechniqueError
+import kotlin.time.TestTimeSource
+import kotlin.time.Duration.Companion.seconds
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.test.Test
@@ -19,8 +21,10 @@ class GoldenReplayTest {
             val expected = lines("golden/$name.expected.csv")
             assertEquals(input.size, expected.size, name)
             val counter = PushupCounter()
-            val workout = com.example.pushuptrainer_mobile.features.workout.domain.usecase.WorkoutSessionUseCase()
+            val clock = TestTimeSource()
+            val workout = com.example.pushuptrainer_mobile.features.workout.domain.usecase.WorkoutSessionUseCase(timeSource = clock)
             workout.ready(0)
+            clock += 5.seconds
             for (index in input.indices) {
                 val row = input[index].split(',')
                 val gold = expected[index].split(',')

@@ -26,6 +26,8 @@ dependencies {
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }
 
 android {
@@ -60,4 +62,5 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions.unitTests.isIncludeAndroidResources = true
 }
