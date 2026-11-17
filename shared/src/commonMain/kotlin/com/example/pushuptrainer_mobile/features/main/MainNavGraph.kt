@@ -9,6 +9,8 @@ import com.example.pushuptrainer_mobile.core.navigation.Router
 import com.example.pushuptrainer_mobile.core.navigation.RouterController
 import com.example.pushuptrainer_mobile.core.navigation.di.GlobalRouterContext
 import com.example.pushuptrainer_mobile.core.navigation.navigationStateConfiguration
+import com.example.pushuptrainer_mobile.features.about.AboutRoute
+import com.example.pushuptrainer_mobile.features.about.aboutSection
 import com.example.pushuptrainer_mobile.features.home.HomeRoute
 import com.example.pushuptrainer_mobile.features.home.homeSection
 import com.example.pushuptrainer_mobile.features.main.di.MainRouterContext
@@ -25,6 +27,7 @@ import org.koin.core.qualifier.qualifier
 
 internal val mainNavigationState = navigationStateConfiguration {
     subclass(ProgressRoute::class, ProgressRoute.serializer())
+    subclass(AboutRoute::class, AboutRoute.serializer())
     subclass(WorkoutRoute::class, WorkoutRoute.serializer())
     subclass(HomeRoute::class, HomeRoute.serializer())
     subclass(PreparationRoute::class, PreparationRoute.serializer())
@@ -41,6 +44,7 @@ internal fun MainNavGraph(content: @Composable (NavigationEntry, @Composable (Mo
         savedStateConfiguration = mainNavigationState,
         registerEntries = {
             progressSection()
+            aboutSection()
             homeSection(mainEntry)
             preparationSection()
             workoutSection()

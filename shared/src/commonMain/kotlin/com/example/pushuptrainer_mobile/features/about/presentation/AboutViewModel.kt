@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pushuptrainer_mobile.core.uikit.components.teamCard.TeamCardUiModel
 import com.example.pushuptrainer_mobile.core.uikit.components.teamCard.TeamGroupUiModel
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,16 +24,13 @@ import pushuptrainermobile.shared.generated.resources.ic_team_design
 import pushuptrainermobile.shared.generated.resources.ic_team_mobile
 import pushuptrainermobile.shared.generated.resources.ic_team_ml
 
-/**
- * ViewModel экрана «О проекте».
- *
- * Состав команды статичный, поэтому ViewModel сразу собирает его из ресурсов.
- * Открытие ссылки, навигация и переключение темы подключаются отдельными задачами.
- */
 class AboutViewModel : ViewModel() {
 
     private val _state = MutableStateFlow<AboutUiState>(AboutUiState.Loading)
     val state: StateFlow<AboutUiState> = _state.asStateFlow()
+
+    private val _effects = MutableSharedFlow<AboutUiEffect>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val effects = _effects.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -43,7 +43,7 @@ class AboutViewModel : ViewModel() {
 
     fun onEvent(event: AboutUiEvent) {
         when (event) {
-            AboutUiEvent.RepositoryLinkClicked -> Unit
+            AboutUiEvent.RepositoryLinkClicked -> _effects.tryEmit(AboutUiEffect.OpenRepository(REPOSITORY_URL))
         }
     }
 
