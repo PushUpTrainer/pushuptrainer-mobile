@@ -6,13 +6,14 @@ import com.example.pushuptrainer_mobile.features.workout.domain.model.WorkoutSes
 import com.example.pushuptrainer_mobile.ml.domain.analysis.PushupCounter
 import com.example.pushuptrainer_mobile.ml.domain.model.Phase
 import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrame
+import com.example.pushuptrainer_mobile.ml.domain.model.PoseFrameGate
 import com.example.pushuptrainer_mobile.ml.domain.model.PushupAnalyzer
 import com.example.pushuptrainer_mobile.ml.domain.model.PushupState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.time.Clock
 import kotlin.time.TimeSource
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class WorkoutSessionUseCase(
     private val goal: Int? = null,
@@ -43,7 +44,7 @@ internal class WorkoutSessionUseCase(
 
     fun ready(generation: Int) {
         if (_state.value.generation != generation || _state.value.phase != WorkoutPhase.Starting) return
-        activeSince = timeSource.markNow() + COUNTER_START_DELAY_SECONDS.seconds
+        activeSince = timeSource.markNow() + PoseFrameGate.PREPARATION_DURATION_MS.milliseconds
         _state.value = _state.value.copy(phase = WorkoutPhase.Running)
     }
 
@@ -51,7 +52,7 @@ internal class WorkoutSessionUseCase(
         if (_state.value.generation != generation || _state.value.phase != WorkoutPhase.Running) return false
         if (lastTimestamp?.let { frame.timestampMs <= it } == true) return false
         lastTimestamp = frame.timestampMs
-        if (activeSince?.hasPassedNow() != true) return true
+        if (activeSince?.hasPassedNow() != true) return false
         val result = analyzer.onFrame(frame)
         val total = repetitions + result.reps
         _state.value = _state.value.copy(analysis = result.copy(reps = total))
@@ -115,8 +116,4 @@ internal class WorkoutSessionUseCase(
 
     private fun mergeErrors(current: Map<String, Int>): Map<String, Int> =
         (errors.keys + current.keys).associateWith { (errors[it] ?: 0) + (current[it] ?: 0) }
-
-    private companion object {
-        const val COUNTER_START_DELAY_SECONDS = 5
-    }
 }

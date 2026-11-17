@@ -23,6 +23,7 @@ import org.koin.dsl.koinApplication
 import org.koin.dsl.module
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
@@ -49,7 +50,7 @@ abstract class WorkoutViewModelTest {
             assertEquals(WorkoutStatus.Running, vm.state.value.status)
             for (remaining in 4 downTo 1) {
                 listener.onFrame(frame((5 - remaining).toLong()).copy(landmarks = List(12) { Landmark(0.5f, 0.5f, 0f, 1f, 1f) }))
-                assertEquals(12, vm.overlay.value?.points?.size)
+                assertNull(vm.overlay.value)
                 advanceTimeBy(1000)
                 runCurrent()
                 assertEquals("0", vm.state.value.repetitions)

@@ -11,7 +11,7 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
     private let output = AVCaptureVideoDataOutput()
     private let frameLock = NSLock()
     private let pointIndices = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
-    private var frameDimensions: [Int: (Int32, Int32)] = [:]
+    private var frameDimensions: [Int: (Int32, Int32, Int)] = [:]
     private var frameTimestamps: [Int] = []
     private var listener: PoseListener?
     private var readyListener: (() -> Void)?
@@ -19,7 +19,18 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
     private var landmarker: PoseLandmarker?
     private var configured = false
     private var lastTimestamp = 0
-    private var shouldRun = false
+    private var generation = 0
+    private var activeGeneration: Int?
+    private var frameGate: PoseFrameGate?
+
+    override init() {
+        super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+
+    @objc private func didEnterBackground() {
+        stop()
+    }
 
     func start(listener: PoseListener) {
         self.listener = listener
@@ -35,28 +46,42 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
     }
 
     func resume() {
-        shouldRun = true
+        frameLock.lock()
+        guard activeGeneration == nil else {
+            frameLock.unlock()
+            return
+        }
+        generation += 1
+        let current = generation
+        activeGeneration = current
+        frameGate = nil
+        frameLock.unlock()
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            startSession()
+            startSession(generation: current)
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] allowed in
                 DispatchQueue.main.async {
-                    guard let self, self.shouldRun else { return }
+                    guard let self, self.isActive(current) else { return }
                     if allowed {
-                        self.startSession()
+                        self.startSession(generation: current)
                     } else {
-                        self.reportError("Разрешите доступ к камере в настройках")
+                        self.reportError("Разрешите доступ к камере в настройках", generation: current)
                     }
                 }
             }
         default:
-            reportError("Разрешите доступ к камере в настройках")
+            reportError("Разрешите доступ к камере в настройках", generation: current)
         }
     }
 
     func stop() {
-        shouldRun = false
+        frameLock.lock()
+        activeGeneration = nil
+        frameGate = nil
+        frameDimensions.removeAll()
+        frameTimestamps.removeAll()
+        frameLock.unlock()
         listener = nil
         errorListener = nil
         readyListener = nil
@@ -65,23 +90,31 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
         }
     }
 
-    private func startSession() {
+    private func startSession(generation current: Int) {
         sessionQueue.async { [weak self] in
-            guard let self else { return }
+            guard let self, self.isActive(current) else { return }
             do {
                 if !self.configured {
                     try self.configure()
                 }
+                guard self.isActive(current) else { return }
                 if !self.session.isRunning {
                     self.session.startRunning()
                 }
                 guard self.session.isRunning else { throw CameraError.cameraUnavailable }
                 DispatchQueue.main.async { [weak self] in
-                    guard let self, self.shouldRun else { return }
+                    guard let self else { return }
+                    self.frameLock.lock()
+                    guard self.activeGeneration == current, self.frameGate == nil else {
+                        self.frameLock.unlock()
+                        return
+                    }
+                    self.frameGate = PoseFrameGate(readyAtNanos: self.hostTimeNanos())
+                    self.frameLock.unlock()
                     self.readyListener?()
                 }
             } catch {
-                self.reportError(error.localizedDescription)
+                self.reportError(error.localizedDescription, generation: current)
             }
         }
     }
@@ -133,43 +166,58 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
     }
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        guard presentationTime.isNumeric, let clock = session.synchronizationClock else { return }
+        let captureTime = CMSyncConvertTime(presentationTime, from: clock, to: CMClockGetHostTimeClock())
+        guard captureTime.isNumeric else { return }
+        let capturedAtNanos = CMTimeConvertScale(captureTime, timescale: 1_000_000_000, method: .default).value
+        frameLock.lock()
+        guard let current = activeGeneration,
+              frameGate?.allows(capturedAtNanos: capturedAtNanos, nowNanos: hostTimeNanos()) == true else {
+            frameLock.unlock()
+            return
+        }
+        frameLock.unlock()
         guard let landmarker, let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
         let width = Int32(CVPixelBufferGetWidth(pixelBuffer))
         let height = Int32(CVPixelBufferGetHeight(pixelBuffer))
-        let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-        guard presentationTime.isValid else { return }
         let timestamp = max(Int(CMTimeGetSeconds(presentationTime) * 1000), lastTimestamp + 1)
         lastTimestamp = timestamp
 
         do {
             let image = try MPImage(sampleBuffer: sampleBuffer, orientation: .up)
             frameLock.lock()
-            frameDimensions[timestamp] = (width, height)
+            guard activeGeneration == current else {
+                frameLock.unlock()
+                return
+            }
+            frameDimensions[timestamp] = (width, height, current)
             frameTimestamps.append(timestamp)
             if frameTimestamps.count > 120 {
                 frameDimensions.removeValue(forKey: frameTimestamps.removeFirst())
             }
-            frameLock.unlock()
+            defer { frameLock.unlock() }
             try landmarker.detectAsync(image: image, timestampInMilliseconds: timestamp)
         } catch {
             frameLock.lock()
             frameDimensions.removeValue(forKey: timestamp)
             frameLock.unlock()
-            reportError(error.localizedDescription)
+            reportError(error.localizedDescription, generation: current)
         }
     }
 
     func poseLandmarker(_ poseLandmarker: PoseLandmarker, didFinishDetection result: PoseLandmarkerResult?, timestampInMilliseconds timestamp: Int, error: (any Error)?) {
-        if let error {
-            reportError(error.localizedDescription)
-            return
-        }
-
         frameLock.lock()
         let dimensions = frameDimensions.removeValue(forKey: timestamp)
         frameLock.unlock()
         guard let dimensions else { return }
+        let current = dimensions.2
+        guard isActive(current) else { return }
+        if let error {
+            reportError(error.localizedDescription, generation: current)
+            return
+        }
 
         let points: [Shared.Landmark]?
         if let pose = result?.landmarks.first, pose.count > 28 {
@@ -194,14 +242,24 @@ final class PoseCameraService: NSObject, PoseSource, AVCaptureVideoDataOutputSam
             landmarks: points
         )
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.shouldRun else { return }
+            guard let self, self.isActive(current) else { return }
             self.listener?.onFrame(frame_: frame)
         }
     }
 
-    private func reportError(_ value: String) {
+    private func hostTimeNanos() -> Int64 {
+        CMTimeConvertScale(CMClockGetTime(CMClockGetHostTimeClock()), timescale: 1_000_000_000, method: .default).value
+    }
+
+    private func isActive(_ current: Int) -> Bool {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+        return activeGeneration == current
+    }
+
+    private func reportError(_ value: String, generation current: Int) {
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.shouldRun else { return }
+            guard let self, self.isActive(current) else { return }
             self.errorListener?(value)
         }
     }
