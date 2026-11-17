@@ -48,7 +48,6 @@ import pushuptrainermobile.shared.generated.resources.progress_empty_description
 import pushuptrainermobile.shared.generated.resources.progress_empty_title
 import pushuptrainermobile.shared.generated.resources.progress_record
 import pushuptrainermobile.shared.generated.resources.progress_subtitle
-import pushuptrainermobile.shared.generated.resources.progress_today
 import pushuptrainermobile.shared.generated.resources.progress_total
 import pushuptrainermobile.shared.generated.resources.progress_trainings
 
@@ -74,11 +73,6 @@ internal fun ProgressScreen(state: ProgressUiState, onEvent: (ProgressUiEvent) -
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 StreakCard(state.streak, isHighlighted = state.isStreakHighlighted)
-                if (state.selectedEpochDay != state.todayEpochDay) {
-                    TextButton(onClick = { onEvent(ProgressUiEvent.TodayClicked) }, modifier = Modifier.align(Alignment.End)) {
-                        Text(stringResource(Res.string.progress_today), color = AppTheme.colors.accent)
-                    }
-                }
                 MonthCalendarCard(
                     model = state.calendar,
                     onPreviousMonthClick = { onEvent(ProgressUiEvent.PreviousMonthClicked) },
