@@ -13,12 +13,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.pushuptrainer_mobile.LocalToggleTheme
 import com.example.pushuptrainer_mobile.core.uikit.components.repositoryLink.RepositoryLink
 import com.example.pushuptrainer_mobile.core.uikit.components.screenHeader.ScreenHeader
@@ -27,6 +32,7 @@ import com.example.pushuptrainer_mobile.core.uikit.components.teamCard.TeamCard
 import com.example.pushuptrainer_mobile.core.uikit.theme.AppTheme
 import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import pushuptrainermobile.shared.generated.resources.Res
 import pushuptrainermobile.shared.generated.resources.about_subtitle
 import pushuptrainermobile.shared.generated.resources.about_title
@@ -34,10 +40,21 @@ import pushuptrainermobile.shared.generated.resources.about_title
 /** Точка входа экрана для продакшена: берёт состояние из ViewModel. */
 @Composable
 internal fun AboutRoute(
-    viewModel: AboutViewModel,
+    viewModel: AboutViewModel = koinViewModel(),
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val uriHandler = LocalUriHandler.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(viewModel, uriHandler, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is AboutUiEffect.OpenRepository -> uriHandler.openUri(effect.url)
+                }
+            }
+        }
+    }
     AboutScreen(
         state = state,
         onEvent = viewModel::onEvent,
