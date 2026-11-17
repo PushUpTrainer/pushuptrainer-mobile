@@ -27,6 +27,44 @@ import org.koin.dsl.module
 
 class WorkoutStorageIosTest {
     @Test
+    fun zeroWorkoutsAreNotSavedAndStatisticsObserveRealRoomChanges() = runBlocking {
+        val database = createWorkoutDatabase(Room.inMemoryDatabaseBuilder<WorkoutDatabase>())
+        val application = koinApplication { modules(iosAppModules, module { single<WorkoutDatabase> { database } }) }
+        try {
+            val save = application.koin.get<SaveWorkoutUseCase>()
+            val source = application.koin.get<WorkoutLocalDataSource>()
+            val progress = application.koin.get<com.example.pushuptrainer_mobile.features.progress.domain.usecase.ObserveProgressUseCase>()
+            val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+            val zero = CompletedWorkout("zero", now, 5000, 0, null, emptyMap())
+            assertEquals(false, save(zero))
+            assertEquals(null, source.getSession("zero"))
+            assertEquals(0, progress(null).first().dayWorkouts)
+            save(zero.copy(id = "positive", repetitions = 7))
+            source.save(WorkoutSessionEntity("legacy-zero", now, 1000, 0, null), emptyList())
+            val history = progress(null).first()
+            assertEquals(1, history.dayWorkouts)
+            assertEquals(7, history.dayRepetitions)
+            assertEquals(7L, history.totalRepetitions)
+            assertEquals(7, history.bestWorkout)
+            assertEquals(1, history.totalWorkouts)
+            assertEquals(7.0, history.averageRepetitions)
+            assertEquals(1, history.streakDays)
+            val home = application.koin.get<ObserveHomeHistoryUseCase>()().first()
+            assertEquals(1, home.workouts)
+            assertEquals(7, home.repetitions)
+            source.deleteSession("positive")
+            val empty = progress(null).first()
+            assertEquals(0, empty.dayWorkouts)
+            assertEquals(0, empty.totalWorkouts)
+            assertEquals(0.0, empty.averageRepetitions)
+            assertEquals(0, empty.streakDays)
+        } finally {
+            application.close()
+            database.close()
+        }
+    }
+
+    @Test
     fun workoutSaveUseCasePersistsOneResultAndPreservesFirstSnapshotOnRetry() = runBlocking {
         val database = createWorkoutDatabase(Room.inMemoryDatabaseBuilder<WorkoutDatabase>())
         val application = koinApplication {

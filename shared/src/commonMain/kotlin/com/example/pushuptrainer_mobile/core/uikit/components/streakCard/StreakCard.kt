@@ -34,6 +34,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import pushuptrainermobile.shared.generated.resources.Res
 import pushuptrainermobile.shared.generated.resources.img_streak_fire
+import pushuptrainermobile.shared.generated.resources.streak_start
+import pushuptrainermobile.shared.generated.resources.streak_start_caption
 import pushuptrainermobile.shared.generated.resources.streak_caption
 import pushuptrainermobile.shared.generated.resources.streak_days_in_row_few
 import pushuptrainermobile.shared.generated.resources.streak_days_in_row_many
@@ -84,7 +86,7 @@ fun StreakCard(
         Spacer(Modifier.width(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(
-                text = russianPluralString(
+                text = if (model.showStartPrompt) stringResource(Res.string.streak_start) else russianPluralString(
                     count = model.daysInRow,
                     one = Res.string.streak_days_in_row_one,
                     few = Res.string.streak_days_in_row_few,
@@ -94,7 +96,7 @@ fun StreakCard(
                 color = colors.textPrimary,
             )
             Text(
-                text = stringResource(Res.string.streak_caption),
+                text = stringResource(if (model.showStartPrompt) Res.string.streak_start_caption else Res.string.streak_caption),
                 style = AppTheme.typography.caption,
                 color = colors.textSecondary,
             )
@@ -128,6 +130,7 @@ private fun StreakCardPreviewContent() {
             StreakCard(model = StreakCardUiModel(daysInRow = 3), isHighlighted = true)
             StreakCard(model = StreakCardUiModel(daysInRow = 3), isHighlighted = false)
             StreakCard(model = StreakCardUiModel(daysInRow = 1), isHighlighted = true)
+            StreakCard(model = StreakCardUiModel(0, showStartPrompt = true), isHighlighted = false)
         }
     }
 }

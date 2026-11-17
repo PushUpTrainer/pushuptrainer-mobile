@@ -25,6 +25,8 @@ import com.example.pushuptrainer_mobile.core.uikit.theme.PushUpTrainerTheme
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import pushuptrainermobile.shared.generated.resources.Res
+import pushuptrainermobile.shared.generated.resources.ic_calendar
+import pushuptrainermobile.shared.generated.resources.ic_nav_progress
 import pushuptrainermobile.shared.generated.resources.ic_repeat
 import pushuptrainermobile.shared.generated.resources.ic_trophy
 
@@ -68,6 +70,8 @@ fun StatTile(
 private fun StatTileIconUiModel.iconResource(): DrawableResource = when (this) {
     StatTileIconUiModel.Repetitions -> Res.drawable.ic_repeat
     StatTileIconUiModel.Record -> Res.drawable.ic_trophy
+    StatTileIconUiModel.Trainings -> Res.drawable.ic_calendar
+    StatTileIconUiModel.Average -> Res.drawable.ic_nav_progress
 }
 
 @Preview

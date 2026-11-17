@@ -14,4 +14,6 @@ enum class StatTileIconUiModel {
 
     /** Кубок рекорда. */
     Record,
+    Trainings,
+    Average,
 }

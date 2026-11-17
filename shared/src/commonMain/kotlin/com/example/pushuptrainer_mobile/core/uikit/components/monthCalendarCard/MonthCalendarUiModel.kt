@@ -10,6 +10,7 @@ package com.example.pushuptrainer_mobile.core.uikit.components.monthCalendarCard
 data class MonthCalendarUiModel(
     val title: String,
     val weeks: List<List<MonthDayUiModel?>>,
+    val canGoForward: Boolean = true,
 )
 
 /** Один день в календаре месяца. */
@@ -17,6 +18,9 @@ data class MonthDayUiModel(
     val dayOfMonth: Int,
     val period: MonthDayPeriodUiModel,
     val hasWorkout: Boolean,
+    val epochDay: Long? = null,
+    val isSelected: Boolean = period == MonthDayPeriodUiModel.Today,
+    val dateLabel: String = dayOfMonth.toString(),
 )
 
 /** Положение дня относительно сегодняшнего. */
